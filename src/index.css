@@ -1,188 +1,60 @@
-/* ======================================================
-   ROOT STYLES
-====================================================== */
-
-:root {
-    --main-font: "Montserrat", sans-serif;
-    --second-family: "Dela Gothic One", sans-serif;
-
-    --white: rgba(255, 255, 255, 1);
-    --white-hover: rgba(255, 255, 255, 0.9);
-    --black: rgba(0, 0, 0, 1);
-    --red: rgba(230, 32, 43, 1);
-    --red-hover: rgba(230, 32, 43, 0.9);
-
-    font-family: var(--main-font), system-ui, -apple-system, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-
-    font-size: 100%; /* замість 16px */
-    line-height: 1.5;
-    font-weight: 400;
-    color: var(--white);
-    background-color: var(--black);
-}
-
-.hide {
-    display: none; /*- DELETE AFTER!*/
-}
+@import './styles/variables.css';
+@import './styles/reset.css';
+@import './styles/base.css';
 
 
-/* ======================================================
-   RESET / BASE STYLES
-====================================================== */
+/*!*?????????????????????????????????????????????????????*!*/
+/*!* ======================================================*/
+/*   WRAPPER STYLES*/
+/*====================================================== *!*/
 
-html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-}
-
-body {
-    font-family: var(--main-font), system-ui, -apple-system, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--black);
-    color: var(--white);
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-    margin: 0;
-}
-
-p:last-child {
-    margin-bottom: 0;
-}
-
-ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-a {
-    color: currentColor;
-    text-decoration: none;
-}
-
-button {
-    cursor: pointer;
-}
-
-img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-}
-
-
-/* ======================================================
-   CONTAINER STYLES
-====================================================== */
-
-/*!* Styles for Mobile devices *!*/
-.container {
-    /*max-width: 320px;*/
-    min-width: 320px;
-    padding: 20px 20px;
-    margin: 0 auto;
-}
-
-/*!* Styles for Tablet devices *!*/
-@media only screen and (min-width: 768px) {
-    .container {
-        max-width: 768px;
-        padding: 20px 30px;
-    }
-}
-
-/*!* Styles for Tablet/Desktop devices *!*/
-@media only screen and (min-width: 1024px) {
-    .container {
-        max-width: 1024px;
-        padding: 20px 40px;
-    }
-}
-
-/*!* Styles for Desktop devices *!*/
-@media only screen and (min-width: 1280px) {
-    .container {
-        max-width: 1280px;
-        padding: 30px 50px;
-    }
-}
-
-/*/* Styles for Widescreen devices *!*/
-@media only screen and (min-width: 1440px) {
-    .container {
-        max-width: 1440px;
-        padding: 40px 60px;
-    }
-}
-
-/*!*!* Styles for Ultra Widescreen devices *!*!*/
-/*@media only screen and (min-width: 1920px) {*/
-/*  .container {*/
-/*    max-width: 1920px;*/
-/*  }*/
+/*.wrapper {*/
+/*    border-bottom: 1px solid var(--red);*/
 /*}*/
 
-/*?????????????????????????????????????????????????????*/
-/* ======================================================
-   WRAPPER STYLES
-====================================================== */
+/*.wrapper.search {*/
+/*    border-bottom: none;*/
+/*}*/
 
-.wrapper {
-    border-bottom: 1px solid var(--red);
-}
+/*.wrapper.footer {*/
+/*    border-bottom: none;*/
+/*}*/
 
-.wrapper.search {
-    border-bottom: none;
-}
+/*!*!* Styles for Tablet devices *!*!*/
+/*@media only screen and (min-width: 768px) {*/
+/*    .wrapper {*/
+/*        border-bottom: 2px solid var(--red);*/
+/*    }*/
+/*}*/
 
-.wrapper.footer {
-    border-bottom: none;
-}
+/*!*!* Styles for Desktop devices *!*!*/
+/*@media only screen and (min-width: 1280px) {*/
+/*    .wrapper {*/
+/*        border-bottom: 3px solid var(--red);*/
+/*    }*/
+/*}*/
 
-/*!* Styles for Tablet devices *!*/
-@media only screen and (min-width: 768px) {
-    .wrapper {
-        border-bottom: 2px solid var(--red);
-    }
-}
+/*!*!* Styles for Widescreen devices *!*!*/
+/*@media only screen and (min-width: 1440px) {*/
 
-/*!* Styles for Desktop devices *!*/
-@media only screen and (min-width: 1280px) {
-    .wrapper {
-        border-bottom: 3px solid var(--red);
-    }
-}
+/*}*/
 
-/*/* Styles for Widescreen devices *!*/
-@media only screen and (min-width: 1440px) {
+/*!*?????????????????????????????????????????????????????*!*/
+/*!* ======================================================*/
+/*   UNKNOWN STYLES*/
+/*====================================================== *!*/
 
-}
+/*body {*/
+/*    !*display: flex;*!*/
+/*    !*flex-direction: column;*!*/
+/*    !*min-width: 100vw;*!*/
+/*    !*min-height: 100vh;*!*/
+/*    !*margin: 0;*!*/
+/*    !*background-color: var(--white);*!*/
+/*}*/
 
-/*?????????????????????????????????????????????????????*/
-/* ======================================================
-   UNKNOWN STYLES
-====================================================== */
-
-body {
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*min-width: 100vw;*/
-    /*min-height: 100vh;*/
-    /*margin: 0;*/
-    /*background-color: var(--white);*/
-}
-
-h1 {
-    /*font-family: var(--second-family), serif;*/
-    font-size: 72px;
-    font-weight: 700;
-}
+/*h1 {*/
+/*    !*font-family: var(--second-family), serif;*!*/
+/*    font-size: 72px;*/
+/*    font-weight: 700;*/
+/*}*/

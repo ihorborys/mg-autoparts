@@ -1,0 +1,31 @@
+:root {
+    /* =====Fonts================================= */
+    --main-font: "Montserrat", sans-serif;
+    --second-family: "Dela Gothic One", sans-serif;
+
+    /* =====Colors================================= */
+    --white: rgba(255, 255, 255, 1);
+    --white-hover: rgba(255, 255, 255, 0.9);
+    --grey: rgba(128, 128, 128, 1);
+    --black: rgba(0, 0, 0, 1);
+    --red: rgba(230, 32, 43, 1);
+    --red-hover: rgba(230, 32, 43, 0.9);
+}
+
+
+/* =====Container variables=============================== */
+:root {
+    --container-padding: 20px;
+}
+
+@media (min-width: 768px) {
+    :root {
+        --container-padding: 30px;
+    }
+}
+
+@media (min-width: 1440px) {
+    :root {
+        --container-padding: 60px;
+    }
+}

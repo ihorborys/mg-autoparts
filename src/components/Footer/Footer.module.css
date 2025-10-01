@@ -1,0 +1,69 @@
+.wrapper {
+    background-color: var(--grey);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.address {
+    font-style: normal;
+}
+
+.addressList {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addressItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.icon {
+    fill: var(--white);
+}
+
+.link {
+    color: var(--white);
+    /*text-decoration: underline;*/
+    transition: color 0.3s ease-in;
+}
+
+.link:hover {
+    color: var(--red);
+}
+
+.nav {
+    margin: 16px 0;
+}
+
+.logo {
+    display: inline-block;
+}
+
+.logoImg {
+    width: 176px;
+}
+
+.copyright {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 14px;
+}
+
+.copyrightLink {
+    cursor: pointer;
+    transition: color 0.3s ease-in;
+}
+
+.copyrightLink:hover {
+    color: var(--red);
+}
