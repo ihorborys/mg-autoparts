@@ -1,0 +1,78 @@
+.container {
+    margin: 0 auto;
+    max-width: 320px;
+    padding: 0 32px;
+}
+
+
+@media screen and (min-width: 768px) {
+    .container {
+        padding: 0 64px;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .container {
+        max-width: 1440px;
+    }
+}
+
+.catalogPageWrapper {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    justify-content: center;
+    align-items: start;
+    margin-top: 48px;
+}
+
+.catalogFilters {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-right: 64px;
+
+}
+
+.searchBtn {
+    border-radius: 200px;
+    padding: 16px 48px;
+    background-color: var(--colors-button);
+    color: var(--colors-white);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.50;
+    letter-spacing: -0.08px;
+    cursor: pointer;
+    margin-top: auto;
+}
+
+.searchBtn:hover {
+    background-color: var(--colors-button-hover);
+}
+
+.catalogList {
+}
+
+@media screen and (min-width: 360px) {
+    .catalogContainer {
+        padding: 0 32px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .catalogContainer {
+        padding: 0 64px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .catalogPageWrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+        margin-top: 48px;
+    }
+
+}
