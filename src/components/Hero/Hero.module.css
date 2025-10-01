@@ -1,0 +1,49 @@
+.wrapper {
+    background-image: image-set(
+            url('/img/hero/hero.webp') 1x,
+            url('/img/hero/hero@2x.webp') 2x
+    );
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    color: var(--white);
+}
+
+.title {
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 0.90;
+    margin-bottom: 16px;
+}
+
+.subTitle {
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.33;
+    margin-bottom: 40px;
+}
+
+@media screen and (min-width: 768px) {
+    .title {
+        font-size: 48px;
+        line-height: 0.667;
+    }
+
+    .subTitle {
+        font-size: 24px;
+    }
+}

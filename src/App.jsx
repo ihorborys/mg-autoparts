@@ -3,7 +3,12 @@ import {Route, Routes} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import Loader from "./components/Loader/Loader.jsx";
 
-const HomePage = lazy(() => import("./pages/HomePage/HomePage.jsx"));
+const HomePage = lazy(() =>
+    new Promise(resolve => {
+        setTimeout(() => resolve(import("./pages/HomePage/HomePage.jsx")), 2000);
+    })
+);
+
 const CatalogPage = lazy(() => import("./pages/CatalogPage/CatalogPage.jsx"));
 const CatalogDetailsPage = lazy(
     () => import("./pages/CatalogDetailsPage/CatalogDetailsPage.jsx"),
