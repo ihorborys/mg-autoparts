@@ -1,0 +1,29 @@
+.catalogFiltersLocation {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.catalogFiltersLocation {
+    margin-bottom: 56px;
+}
+
+.catalogFiltersLocationItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--colors-white-titles);
+    border-radius: 12px;
+    padding: 18px 218px 18px 20px;
+}
+
+.titleLocation {
+    color: var(--colors-secondary-grey);
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.iconLocation {
+    margin-right: 8px;
+}

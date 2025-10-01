@@ -36,26 +36,26 @@ export default function Header() {
                             />
                         </a>
 
-                        {/*<ul className={styles.headerMenu}>*/}
-                        {/*    <li className={styles.headerItem}>*/}
-                        {/*        <a className={`${styles.headerLink} ${styles.active}`} href="./index.html">*/}
-                        {/*            Постачальники*/}
-                        {/*        </a>*/}
-                        {/*    </li>*/}
-                        {/*    <li className={styles.headerItem}>*/}
-                        {/*        <a className={styles.headerLink} href="#">*/}
-                        {/*            Прайси*/}
-                        {/*        </a>*/}
-                        {/*    </li>*/}
-                        {/*    <li className={styles.headerItem}>*/}
-                        {/*        <a className={styles.headerLink} href="#">*/}
-                        {/*            Співпраця*/}
-                        {/*        </a>*/}
-                        {/*    </li>*/}
-                        {/*</ul>*/}
+                        <ul className={styles.headerMenu}>
+                            <li className={styles.headerItem}>
+                                <a className={`${styles.headerLink} ${styles.active}`} href="./index.html">
+                                    Постачальники
+                                </a>
+                            </li>
+                            <li className={styles.headerItem}>
+                                <a className={styles.headerLink} href="#">
+                                    Прайси
+                                </a>
+                            </li>
+                            <li className={styles.headerItem}>
+                                <a className={styles.headerLink} href="#">
+                                    Співпраця
+                                </a>
+                            </li>
+                        </ul>
 
-                        {/* Тут буде компонент бургер-меню */}
-                        {/* <BurgerMenu /> */}
+                        Тут буде компонент бургер-меню
+                        <BurgerMenu/>
                     </nav>
                 </div>
             </div>

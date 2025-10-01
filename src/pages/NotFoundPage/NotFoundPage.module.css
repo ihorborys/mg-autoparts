@@ -7,7 +7,7 @@
     font-size: 32px;
     font-weight: bold;
     text-align: center;
-    color: black;
+    color: var(--red);
     margin: 40px;
 }
 
@@ -15,12 +15,12 @@
     font-size: 28px;
     font-weight: bold;
     text-align: center;
-    color: var(--colors-button-hover);
+    color: var(--white);
     margin-bottom: 10px;
 }
 
 .link:hover {
-    color: var(--colors-button-hover);
+    color: var(--white-hover);
     text-decoration: underline 1px;
     opacity: 0.6;
 }

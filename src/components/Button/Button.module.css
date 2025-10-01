@@ -1,0 +1,20 @@
+.container {
+    border-radius: 200px;
+    padding: 16px 48px;
+    background-color: var(--red);
+    color: var(--white);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.50;
+    letter-spacing: -0.08px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border: none;
+    /* 💡 Глибша тінь + внутрішнє світло */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), /* зовнішня тінь */ inset 0 1px 0 rgba(255, 255, 255, 0.3); /* внутрішнє світло */
+}
+
+.container:hover {
+    background-color: var(--red-hover);
+    transform: scale(1.02);
+}

@@ -1,0 +1,17 @@
+.container {
+    border: 1px solid var(--colors-white-1);
+    border-radius: 200px;
+    padding: 16px 32px;
+    margin: 40px 0 52px 0;
+    text-align: center;
+    background-color: var(--colors-white);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.50;
+    letter-spacing: -0.08px;
+    cursor: pointer;
+}
+
+.container:hover {
+    border: 1px solid var(--colors-button-hover);
+}

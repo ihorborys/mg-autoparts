@@ -1,0 +1,51 @@
+.catalogFiltersType {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.titleType {
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 32px 0 24px 0;
+}
+
+.typeList {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--colors-white-1);
+    margin-bottom: 40px;
+}
+
+.typeItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 112px;
+    height: 96px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 1px solid var(--colors-white-1);
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.typeName {
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.08px;
+    text-align: center;
+}
+
+.active {
+    border: 1px solid var(--colors-button);
+}

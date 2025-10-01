@@ -1,0 +1,12 @@
+.errorWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorMessage {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px;
+    text-align: center;
+}

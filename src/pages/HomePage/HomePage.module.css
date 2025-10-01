@@ -1,5 +1,5 @@
 .sectionHero {
-    background-image: url('/assets/img/hero.webp');
+    background-image: url('/img/hero/hero.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -9,7 +9,7 @@
 /* Retina (2x) */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .sectionHero {
-        background-image: url('/assets/img/hero@2x.webp');
+        background-image: url('/img/hero/hero@2x.webp');
     }
 }
 
@@ -25,7 +25,7 @@
     justify-content: center;
     align-items: flex-start;
     height: 100%;
-    color: var(--colors-white-titles);
+    color: var(--white);
 }
 
 .heroTitle {
