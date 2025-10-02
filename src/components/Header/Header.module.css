@@ -18,7 +18,7 @@
     align-items: center;
     gap: 10px;
     /*padding: 10px 0;*/
-    /*transition: color 0.3s ease-in;*/
+    transition: color 0.3s ease-in;
 }
 
 .addressItemIcon {
@@ -26,22 +26,22 @@
     transition: fill 0.3s ease-in;
 }
 
-/*!* hover / focus effect for icon *!*/
-/*.address-item:has(.address-link:hover) .address-item-icon,*/
-/*.address-item:has(.address-link:focus) .address-item-icon {*/
-/*    fill: var(--red);*/
-/*}*/
+/*hover / focus effect for icon*/
+.addressItem:has(.addressLink:hover) .addressItemIcon,
+.addressItem:has(.addressLink:focus) .addressItemIcon {
+    fill: var(--red);
+}
 
-/*.address-link {*/
-/*    transition: color 0.3s ease-in;*/
-/*}*/
+.addressLink {
+    transition: color 0.3s ease-in;
+}
 
-/*.address-link:hover,*/
-/*.address-link:focus,*/
-/*.header-link:hover,*/
-/*.header-link:focus {*/
-/*    color: var(--red);*/
-/*}*/
+.addressLink:hover,
+.addressLink:focus,
+.headerLink:hover,
+.headerLink:focus {
+    color: var(--red);
+}
 
 /*!* Navigation *!*/
 /*.nav {*/
@@ -135,3 +135,11 @@
 /*        flex-direction: row;*/
 /*    }*/
 /*}*/
+
+
+@media screen and (max-width: 767px) {
+    .addressList {
+        flex-direction: column;
+    }
+}
+

@@ -42,7 +42,7 @@ export default function Slider() {
                     pagination={{clickable: true, dynamicBullets: true}}
                     navigation
                     breakpoints={{
-                        480: {slidesPerView: 2},
+                        768: {slidesPerView: 2},
                         1024: {slidesPerView: 3},
                     }}
                     className={styles.swiper}
