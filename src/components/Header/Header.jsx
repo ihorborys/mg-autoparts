@@ -1,4 +1,4 @@
-import styles from "./header.module.css";
+import styles from "./Header.module.css";
 import Container from "../../layouts/Container/Container.jsx";
 
 const Header = () => {
