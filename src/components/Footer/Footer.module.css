@@ -8,38 +8,6 @@
     justify-content: center;
 }
 
-.address {
-    font-style: normal;
-}
-
-.addressList {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.addressItem {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.icon {
-    fill: var(--white);
-}
-
-.link {
-    color: var(--white);
-    /*text-decoration: underline;*/
-    transition: color 0.3s ease-in;
-}
-
-.link:hover {
-    color: var(--red);
-}
-
 .nav {
     margin: 16px 0;
 }

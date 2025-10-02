@@ -1,31 +1,14 @@
 import styles from "./Header.module.css";
 import Container from "../../layouts/Container/Container.jsx";
+import Address from "../Address/Address.jsx";
 
 const Header = () => {
     return (
         <header className={styles.wrapper}>
             <Container>
                 <div className={styles.container}>
-                    <address className={styles.address}>
-                        <ul className={styles.addressList}>
-                            <li className={styles.addressItem}>
-                                <svg className={styles.addressItemIcon} height="16" width="16">
-                                    <use href="/icons.svg#icon-whatsapp"></use>
-                                </svg>
-                                <a className={styles.addressLink} href="tel:+380970134331">
-                                    +38 (097) 013-43-31
-                                </a>
-                            </li>
-                            <li className={styles.addressItem}>
-                                <svg className={styles.addressItemIcon} height="16" width="16">
-                                    <use href="/icons.svg#icon-mail"></use>
-                                </svg>
-                                <a className={styles.addressLink} href="mailto:contact@maxgear.com.ua">
-                                    contact@maxgear.com.ua
-                                </a>
-                            </li>
-                        </ul>
-                    </address>
+                    
+                    <Address/>
 
                     {/*<nav className={styles.nav}>*/}
                     {/*    <a className={styles.logo} href="./index.html">*/}
