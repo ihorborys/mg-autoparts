@@ -1,0 +1,89 @@
+.swiper {
+    padding: 20px 0;
+}
+
+.slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.slide:hover {
+    transform: translateY(5px);
+}
+
+.slideLink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 220px;
+    transition: opacity 0.3s ease;
+    text-decoration: none;
+}
+
+.slideLink:hover,
+.slideLink:focus {
+    opacity: 0.8;
+}
+
+.slideImg {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+}
+
+.slideLink:hover .slideImg {
+    transform: scale(1.05);
+}
+
+.slideTitle {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: var(--white);
+    transition: color 0.3s ease;
+}
+
+.slideLink:hover .slideTitle,
+.slideLink:focus .slideTitle {
+    color: var(--red);
+}
+
+/* Пагінація */
+:global(.swiper-pagination-bullet) {
+    width: 10px;
+    height: 10px;
+    background-color: var(--red);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+:global(.swiper-pagination-bullet-active) {
+    background-color: var(--white);
+    opacity: 1;
+}
+
+/* Адаптив */
+@media (min-width: 480px) {
+    .slideTitle {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 768px) {
+    .slideTitle {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .slideTitle {
+        font-size: 22px;
+    }
+}
