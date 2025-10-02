@@ -1,33 +1,41 @@
+/*.container {*/
+/*    width: 100%;*/
+/*    max-width: 320px;*/
+/*    padding: 20px;*/
+/*    margin: 0 auto;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*@media only screen and (min-width: 768px) {*/
+/*    .container {*/
+/*        max-width: 768px;*/
+/*        padding: 20px 30px;*/
+/*    }*/
+/*}*/
+
+/*@media only screen and (min-width: 1024px) {*/
+/*    .container {*/
+/*        max-width: 1024px;*/
+/*    }*/
+/*}*/
+
+/*@media only screen and (min-width: 1280px) {*/
+/*    .container {*/
+/*        max-width: 1280px;*/
+/*        padding: 20px 40px;*/
+/*    }*/
+/*}*/
+
+/*@media only screen and (min-width: 1440px) {*/
+/*    .container {*/
+/*        max-width: 1440px;*/
+/*    }*/
+/*}*/
+
 .container {
     width: 100%;
-    max-width: 320px;
-    padding: 20px;
+    max-width: clamp(320px, 90vw, 1440px);
+    padding: 20px clamp(16px, 5vw, 40px); /* 20px зверху/знизу, адаптивно з боків */
     margin: 0 auto;
     box-sizing: border-box;
-}
-
-@media only screen and (min-width: 768px) {
-    .container {
-        max-width: 768px;
-        padding: 20px 30px;
-    }
-}
-
-@media only screen and (min-width: 1024px) {
-    .container {
-        max-width: 1024px;
-    }
-}
-
-@media only screen and (min-width: 1280px) {
-    .container {
-        max-width: 1280px;
-        padding: 20px 40px;
-    }
-}
-
-@media only screen and (min-width: 1440px) {
-    .container {
-        max-width: 1440px;
-    }
 }

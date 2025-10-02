@@ -81,7 +81,7 @@
     }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 549px) {
     .list {
         flex-direction: column;
         gap: 10px;

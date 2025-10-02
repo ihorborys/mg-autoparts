@@ -75,7 +75,7 @@
     }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 549px) {
     .addressList {
         flex-direction: column;
         align-items: center;
