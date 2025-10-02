@@ -1,7 +1,10 @@
+.wrapper {
+    /*box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); !* світла тінь *!*/
+
+}
+
 .container {
-    /*margin: 0 auto;*/
-    /*padding: 0 32px;*/
-    /*background-color: var(--colors-white-titles);*/
+
 }
 
 .list {
