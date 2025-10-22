@@ -8,10 +8,13 @@ from .storage import StorageClient
 load_dotenv()
 
 app = FastAPI(title="Maxgear API")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['http://127.0.0.1:5173', 'http://localhost:5173'],
-    allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 storage = StorageClient()
@@ -31,8 +34,8 @@ def health():
 def prices_latest():
     p123 = os.getenv("R2_PREFIX_123", "1_23/")
     p127 = os.getenv("R2_PREFIX_127", "1_27/")
-    b2b_key = storage.latest_key(p123)  # очікуємо .xlsx
-    site_key = storage.latest_key(p127)  # очікуємо .csv
+    b2b_key = storage.latest_key(p123)
+    site_key = storage.latest_key(p127)
     return {
         "b2b_key": b2b_key,
         "b2b_url": storage.url_for(b2b_key),
