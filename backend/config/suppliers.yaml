@@ -1,34 +1,81 @@
+## ============================================================
+##  SUPPLIERS CONFIG (Maxgear)
+##  Описує, як зчитувати сирі CSV / GZ файли постачальників
+##  і конвертувати їх у стандартну модель:
+##  code, unicode, brand, name, stock, price_EUR
+## ============================================================
+#
+#AP_GDANSK:
+#  supplier_id: 2
+#  encoding: "utf-8"
+#  delimiter: ";"
+#  decimal: ","                # у сирому файлі "0,01"
+#  has_header: false
+#  columns: # позиції колонок у сирому файлі (1-based)
+#    code: 1
+#    unicode: 2
+#    brand: 3
+#    name: 4
+#    stock: 5
+#    price_EUR: 6
+#  filters:
+#    drop_if_missing: [ "code", "price_EUR" ]
+#    stock_mapping:
+#      "STAN": 10
+#      "> 5": 10
+#    stock_min_zero: true       # від’ємні значення → 0
+#  cleaning:
+#    trim_all: true
+#    replace:
+#      - { find: "> 5", replace: "10" }
+#  notes: >
+#    Supplier AP_GDANSK.
+#    Raw format: CODE;UNICODE;BRAND;NAME;STOCK;PRICE_EUR.
+#    All prices are in EUR. Stock fields like "STAN" or "> 5" map to 10.
+
+
 # ============================================================
-#  SUPPLIERS CONFIG (Maxgear)
-#  Описує, як зчитувати сирі CSV / GZ файли постачальників
-#  і конвертувати їх у стандартну модель:
-#  code, unicode, brand, name, stock, price_EUR
+# SUPPLIERS CONFIG
+# Кожен постачальник описується блоком з мапінгом колонок.
 # ============================================================
 
 AP_GDANSK:
   supplier_id: 2
-  encoding: "utf-8"
-  delimiter: ";"
-  decimal: ","                # у сирому файлі "0,01"
-  has_header: false
-  columns: # позиції колонок у сирому файлі (1-based)
-    code: 1
-    unicode: 2
-    brand: 3
-    name: 4
-    stock: 5
-    price_EUR: 6
-  filters:
-    drop_if_missing: [ "code", "price_EUR" ]
-    stock_mapping:
-      "STAN": 10
-      "> 5": 10
-    stock_min_zero: true       # від’ємні значення → 0
-  cleaning:
-    trim_all: true
-    replace:
-      - { find: "> 5", replace: "10" }
+
+  # ----------------- Формат сирого CSV -----------------
+  raw_layout:
+    columns:
+      code: 0         # SYMBOL
+      unicode: 0      # дублюємо code
+      brand: 1        # KLIENTA
+      name: 1         # дублюємо brand
+      stock: 3        # STAN
+      price: 2        # CENA
+    stock_index: 3
+    stock_header_token: "STAN"
+    gt5_to: 10
+
+  # ----------------- Підказки читання CSV -----------------
+  csv_hint:
+    encoding: "utf-8"
+    delimiter: ";"
+
+  # ----------------- Попередня обробка -----------------
+  preprocess:
+    skip_rows: 1        # пропускаємо перший рядок із шапкою
+
+  # ----------------- Нормалізація даних -----------------
+  normalize:
+    replace_gt_sign: true     # замінювати "> 5" на gt5_to
+    trim_spaces: true         # обрізати пробіли
+    replace_commas: true      # замінювати коми у цінах на крапки
+
+  # ----------------- Примітки -----------------
   notes: >
-    Supplier AP_GDANSK.
-    Raw format: CODE;UNICODE;BRAND;NAME;STOCK;PRICE_EUR.
-    All prices are in EUR. Stock fields like "STAN" or "> 5" map to 10.
+    У постачальника AP_GDANSK стовпці:
+    SYMBOL; CENA; KLIENTA; STAN.
+    code = unicode, brand = name.
+    STAN = stock, CENA = price.
+    Перший рядок — заголовок, пропускається.
+
+
