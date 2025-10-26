@@ -1,7 +1,7 @@
 # ============================================================
 #  PROFILES CONFIG (Maxgear)
-#  Множники, формати, валюта, структура колонок для кожного типу прайсу
-#  Використовується для автоматичної генерації Excel/CSV файлів
+#  Визначає множники, формат, валюту та структуру зберігання у R2.
+#  Тепер використовується ієрархія: {factor}/{supplier}/{file}
 # ============================================================
 
 common:
@@ -15,7 +15,7 @@ profiles:
     factor: 1.00
     currency_out: EUR
     format: xlsx
-    r2_prefix: "netto/"
+    r2_prefix: "netto/{supplier}/"
     columns:
       - { from: code,     header: "code" }
       - { from: unicode,  header: "unicode" }
@@ -29,7 +29,7 @@ profiles:
     factor: 1.23
     currency_out: EUR
     format: xlsx
-    r2_prefix: "1_23/"
+    r2_prefix: "1_23/{supplier}/"
     columns:
       - { from: code,     header: "code" }
       - { from: unicode,  header: "unicode" }
@@ -43,7 +43,7 @@ profiles:
     factor: 1.27
     currency_out: EUR
     format: xlsx
-    r2_prefix: "1_27/"
+    r2_prefix: "1_27/{supplier}/"
     columns:
       - { from: code,     header: "code" }
       - { from: unicode,  header: "unicode" }
@@ -57,7 +57,7 @@ profiles:
     factor: 1.33
     currency_out: UAH
     format: xlsx
-    r2_prefix: "exist/1_33/"
+    r2_prefix: "1_33/exist/{supplier}/"
     rate_policy: nbu_plus        # курс НБУ + надбавка
     rate_params:
       add_uah: 1                 # +1 грн до курсу НБУ
@@ -74,12 +74,12 @@ profiles:
     factor: 1.33
     currency_out: EUR
     format: csv
-    r2_prefix: "site/1_33/"
+    r2_prefix: "1_33/site/{supplier}/"
     csv:
       delimiter: ";"
       header: true
     columns:
-      - { from: supplier_id, header: "supplier_id" }   # бере supplier_id з suppliers.yaml
+      - { from: supplier_id, header: "supplier_id" }
       - { from: code,        header: "code" }
       - { from: unicode,     header: "unicode" }
       - { from: brand,       header: "brand" }

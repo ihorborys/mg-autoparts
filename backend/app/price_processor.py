@@ -63,9 +63,12 @@ def raw_csv_to_rows(input_csv: Path) -> list[list[str]]:
 
 
 def make_excel(rows: list[list[str]], output_xlsx: Path) -> None:
-    df = pd.DataFrame(rows)
+    # Твої rows зараз без шапки. Додаємо шапку під нашу узгоджену схему:
+    # code; unicode; brand; name; stock; price_EUR
+    df = pd.DataFrame(rows, columns=None)
+    # якщо сирі рядки вже мають саме такий порядок — ок.
+    # якщо ні — поки що залишаємо без заголовків, але додаємо "header" вручну:
     output_xlsx.parent.mkdir(parents=True, exist_ok=True)
-    # engine='xlsxwriter' — у тебе вже встановлено
     df.to_excel(output_xlsx, index=False, header=False, engine="xlsxwriter")
 
 
@@ -83,7 +86,7 @@ def process_one_price(
         - 1_23 → префікс b2b_*.xlsx
     Повертає (key, url) з R2.
     """
-    tmp_dir = Path("backend/data/tmp")
+    tmp_dir = Path("data/tmp")
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -103,11 +106,25 @@ def process_one_price(
 
     # 4) upload → R2
     storage = StorageClient()
-    prefix = os.getenv("R2_PREFIX_127", "1_27/") if factor == "1_27" else os.getenv("R2_PREFIX_123", "1_23/")
-    kind = "site" if factor == "1_27" else "b2b"
-    key = f"{prefix}{kind}_{supplier}_{stamp}.xlsx"
-    url = storage.upload_file(str(xlsx_path), key,
-                              content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    supplier_code = supplier.lower()
+
+    if factor == "1_27":
+        prefix_tmpl = os.getenv("R2_PREFIX_127", "1_27/{supplier}/")
+        keep = int(os.getenv("R2_KEEP_127", "7"))
+    else:
+        prefix_tmpl = os.getenv("R2_PREFIX_123", "1_23/{supplier}/")
+        keep = int(os.getenv("R2_KEEP_123", "7"))
+
+    prefix = prefix_tmpl.format(supplier=supplier_code)
+    key = f"{prefix}{supplier_code}_{stamp}.xlsx"
+
+    url = storage.upload_file(
+        local_path=str(xlsx_path),
+        key=key,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        cleanup_prefix=prefix,  # ← тут вказуємо папку для очищення
+        keep_last=keep,  # ← скільки залишити
+    )
 
     # 5) прибирання (тимчасові файли)
     try:
