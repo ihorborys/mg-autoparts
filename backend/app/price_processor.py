@@ -5,10 +5,10 @@ import shutil
 import yaml
 from ftplib import FTP
 from datetime import datetime
-from pathlib import Path
 from typing import Tuple, List, Dict, Any, Optional
-
 import pandas as pd
+from .paths import TEMP_DIR
+from pathlib import Path
 
 from .storage import StorageClient
 
@@ -185,6 +185,157 @@ def _build_output_df(
 
 # ----------------------- Main pipeline -----------------------
 
+# def process_one_price(
+#         remote_gz_path: str,
+#         supplier: str,
+#         supplier_id: Optional[int],
+#         factor: float,
+#         currency_out: str,  # "EUR" | "UAH"
+#         format_: str,  # "xlsx" | "csv"
+#         rounding: Dict[str, int],  # {"EUR":2, "UAH":0}
+#         r2_prefix: str,  # ".../{supplier}/"
+#         columns: List[Dict[str, str]],
+#         csv_cfg: Optional[Dict[str, Any]] = None,
+#         rate: float = 1.0,
+# ) -> Tuple[str, str]:
+#     """
+#     Повний цикл:
+#       FTP → unzip → normalize (per suppliers.yaml) → calc → export (xlsx/csv) → upload R2 (+cleanup) → cleanup tmp
+#     Повертає (key, url) у R2.
+#     """
+#
+#     tmp_dir.mkdir(parents=True, exist_ok=True)
+#
+#     stamp = datetime.now().strftime("%Y%m%d_%H%M")
+#     supplier_code = supplier.lower()
+#
+#     gz_path = tmp_dir / f"{supplier_code}_{stamp}.csv.gz"
+#     csv_path = tmp_dir / f"{supplier_code}_{stamp}.csv"
+#
+#     # 1) FTP
+#     download_file_from_ftp(remote_gz_path, gz_path)
+#
+#     # 2) unzip
+#     unzip_gz_file(gz_path, csv_path)
+#
+#     # 3) normalize → standard df (з урахуванням suppliers.yaml)
+#     sup_cfg = _load_supplier_cfg(supplier)
+#     layout = sup_cfg.get("raw_layout", {}) or {}
+#     colmap: Dict[str, int] = (layout.get("columns") or {})
+#     stock_index = layout.get("stock_index")
+#     stock_header_token = layout.get("stock_header_token", "STAN")
+#     gt5_to = layout.get("gt5_to")
+#     skip_rows = (sup_cfg.get("preprocess") or {}).get("skip_rows", 0)
+#
+#     rows = raw_csv_to_rows(
+#         csv_path,
+#         stock_index=stock_index,
+#         stock_header_token=stock_header_token,
+#         gt5_to=gt5_to,
+#         skip_rows=skip_rows,
+#     )
+#     df_std = _rows_to_standard_df(rows, colmap)
+#
+#     # дублювання (як для AP_GDANSK: unicode=code, name=brand)
+#     if colmap.get("unicode") == colmap.get("code"):
+#         df_std["unicode"] = df_std["code"]
+#     if colmap.get("name") == colmap.get("brand"):
+#         df_std["name"] = df_std["brand"]
+#
+#     # 4) розрахунок ціни + округлення
+#     price_final = _apply_pricing(
+#         df_std, factor=factor, currency_out=currency_out, rate=rate, rounding=rounding
+#     )
+#
+#     # 5) складання вихідного фрейму під columns (із профілю)
+#     out_df = _build_output_df(
+#         df_std, price_final, columns_cfg=columns, supplier_id=supplier_id
+#     )
+#
+#     # 6) експорт (xlsx / csv)
+#     ext = "xlsx" if format_.lower() == "xlsx" else "csv"
+#     out_path = tmp_dir / f"{supplier_code}_{stamp}.{ext}"
+#
+#     if ext == "xlsx":
+#         # Без стилів/рамок — “чистий” Excel
+#         out_df.to_excel(out_path, index=False, engine="xlsxwriter")
+#         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+#     else:
+#         delim = (csv_cfg or {}).get("delimiter", ";")
+#         header = bool((csv_cfg or {}).get("header", True))
+#         out_df.to_csv(out_path, index=False, sep=delim, header=header, encoding="utf-8")
+#         content_type = "text/csv"
+#
+#     # 7) upload → R2 (та локальне очищення за префіксом)
+#     storage = StorageClient()
+#     prefix = r2_prefix  # уже з підставленим {supplier}
+#     key = f"{prefix}{supplier_code}_{stamp}.{ext}"
+#
+#     # вибираємо keep_last із .env залежно від префікса
+#     keep_last = 7
+#     if prefix.startswith("1_23/"):
+#         keep_last = int(os.getenv("R2_KEEP_123", "7"))
+#     elif prefix.startswith("1_27/"):
+#         keep_last = int(os.getenv("R2_KEEP_127", "7"))
+#     elif prefix.startswith("1_33/site/"):
+#         keep_last = int(os.getenv("R2_KEEP_133_SITE", "14"))
+#     elif prefix.startswith("1_33/exist/"):
+#         keep_last = int(os.getenv("R2_KEEP_133_EXIST", "14"))
+#     elif prefix.startswith("netto/"):
+#         keep_last = int(os.getenv("R2_KEEP_NETTO", "5"))
+#
+#     url = storage.upload_file(
+#         local_path=str(out_path),
+#         key=key,
+#         content_type=content_type,
+#         cleanup_prefix=prefix,
+#         keep_last=keep_last,
+#     )
+#
+#     # 8) локальний cleanup tmp
+#     try:
+#         gz_path.unlink(missing_ok=True)
+#         csv_path.unlink(missing_ok=True)
+#         out_path.unlink(missing_ok=True)
+#     except Exception:
+#         pass
+#
+#     return key, url
+
+def _materialize_to_csv(remote_path: str, tmp_dir: Path) -> tuple[Path, list[Path]]:
+    """
+    Приводить будь-яке джерело до локального CSV.
+    Підтримує:
+      - локальний .csv → повертає як є
+      - локальний .gz  → розпаковує у tmp
+      - ftp-шлях (.gz) → качає у tmp → розпаковує у tmp
+    Повертає: (csv_path, cleanup_paths)
+    """
+    cleanup: list[Path] = []
+
+    if os.path.exists(remote_path):
+        p = Path(remote_path)
+        if p.suffix.lower() == ".csv":
+            return p, cleanup
+        if p.suffix.lower() == ".gz":
+            csv_out = tmp_dir / f"{p.stem}"
+            if csv_out.suffix.lower() != ".csv":
+                csv_out = csv_out.with_suffix(".csv")
+            unzip_gz_file(p, csv_out)
+            cleanup.append(csv_out)
+            return csv_out, cleanup
+        raise ValueError(f"Unsupported local file type: {p.suffix}")
+    else:
+        from datetime import datetime
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        gz_tmp = tmp_dir / f"ftp_{stamp}.csv.gz"
+        csv_tmp = tmp_dir / f"ftp_{stamp}.csv"
+        download_file_from_ftp(remote_path, gz_tmp)
+        unzip_gz_file(gz_tmp, csv_tmp)
+        cleanup.extend([gz_tmp, csv_tmp])
+        return csv_tmp, cleanup
+
+
 def process_one_price(
         remote_gz_path: str,
         supplier: str,
@@ -197,28 +348,17 @@ def process_one_price(
         columns: List[Dict[str, str]],
         csv_cfg: Optional[Dict[str, Any]] = None,
         rate: float = 1.0,
+        delete_input_after: bool = False,  # якщо локальний вхід (пошта) — видалити після обробки
 ) -> Tuple[str, str]:
-    """
-    Повний цикл:
-      FTP → unzip → normalize (per suppliers.yaml) → calc → export (xlsx/csv) → upload R2 (+cleanup) → cleanup tmp
-    Повертає (key, url) у R2.
-    """
-    tmp_dir = Path("data/tmp")
+    tmp_dir = TEMP_DIR
     tmp_dir.mkdir(parents=True, exist_ok=True)
-
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     supplier_code = supplier.lower()
 
-    gz_path = tmp_dir / f"{supplier_code}_{stamp}.csv.gz"
-    csv_path = tmp_dir / f"{supplier_code}_{stamp}.csv"
+    # 0) завжди отримуємо локальний CSV + список тимчасових файлів
+    csv_path, cleanup_paths = _materialize_to_csv(remote_gz_path, tmp_dir)
 
-    # 1) FTP
-    download_file_from_ftp(remote_gz_path, gz_path)
-
-    # 2) unzip
-    unzip_gz_file(gz_path, csv_path)
-
-    # 3) normalize → standard df (з урахуванням suppliers.yaml)
+    # 1) normalize → standard df
     sup_cfg = _load_supplier_cfg(supplier)
     layout = sup_cfg.get("raw_layout", {}) or {}
     colmap: Dict[str, int] = (layout.get("columns") or {})
@@ -236,28 +376,21 @@ def process_one_price(
     )
     df_std = _rows_to_standard_df(rows, colmap)
 
-    # дублювання (як для AP_GDANSK: unicode=code, name=brand)
     if colmap.get("unicode") == colmap.get("code"):
         df_std["unicode"] = df_std["code"]
     if colmap.get("name") == colmap.get("brand"):
         df_std["name"] = df_std["brand"]
 
-    # 4) розрахунок ціни + округлення
-    price_final = _apply_pricing(
-        df_std, factor=factor, currency_out=currency_out, rate=rate, rounding=rounding
-    )
+    # 2) calc
+    price_final = _apply_pricing(df_std, factor=factor, currency_out=currency_out, rate=rate, rounding=rounding)
 
-    # 5) складання вихідного фрейму під columns (із профілю)
-    out_df = _build_output_df(
-        df_std, price_final, columns_cfg=columns, supplier_id=supplier_id
-    )
+    # 3) build output
+    out_df = _build_output_df(df_std, price_final, columns_cfg=columns, supplier_id=supplier_id)
 
-    # 6) експорт (xlsx / csv)
+    # 4) export
     ext = "xlsx" if format_.lower() == "xlsx" else "csv"
     out_path = tmp_dir / f"{supplier_code}_{stamp}.{ext}"
-
     if ext == "xlsx":
-        # Без стилів/рамок — “чистий” Excel
         out_df.to_excel(out_path, index=False, engine="xlsxwriter")
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     else:
@@ -266,12 +399,11 @@ def process_one_price(
         out_df.to_csv(out_path, index=False, sep=delim, header=header, encoding="utf-8")
         content_type = "text/csv"
 
-    # 7) upload → R2 (та локальне очищення за префіксом)
+    # 5) upload + cloud cleanup policy
     storage = StorageClient()
-    prefix = r2_prefix  # уже з підставленим {supplier}
+    prefix = r2_prefix
     key = f"{prefix}{supplier_code}_{stamp}.{ext}"
 
-    # вибираємо keep_last із .env залежно від префікса
     keep_last = 7
     if prefix.startswith("1_23/"):
         keep_last = int(os.getenv("R2_KEEP_123", "7"))
@@ -292,11 +424,18 @@ def process_one_price(
         keep_last=keep_last,
     )
 
-    # 8) локальний cleanup tmp
+    # 6) local cleanup
     try:
-        gz_path.unlink(missing_ok=True)
-        csv_path.unlink(missing_ok=True)
+        # прибираємо згенерований вихідний файл
         out_path.unlink(missing_ok=True)
+        # прибираємо тимчасові (те, що повернув хелпер)
+        for p in cleanup_paths:
+            p.unlink(missing_ok=True)
+        # якщо вхід був локальний і хочемо чистити — видаляємо й його
+        if delete_input_after and os.path.exists(remote_gz_path):
+            rp = Path(remote_gz_path)
+            if rp.exists() and rp.resolve() not in [out_path.resolve(), *[c.resolve() for c in cleanup_paths]]:
+                rp.unlink(missing_ok=True)
     except Exception:
         pass
 

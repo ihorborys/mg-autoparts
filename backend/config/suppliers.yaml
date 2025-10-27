@@ -1,39 +1,3 @@
-## ============================================================
-##  SUPPLIERS CONFIG (Maxgear)
-##  Описує, як зчитувати сирі CSV / GZ файли постачальників
-##  і конвертувати їх у стандартну модель:
-##  code, unicode, brand, name, stock, price_EUR
-## ============================================================
-#
-#AP_GDANSK:
-#  supplier_id: 2
-#  encoding: "utf-8"
-#  delimiter: ";"
-#  decimal: ","                # у сирому файлі "0,01"
-#  has_header: false
-#  columns: # позиції колонок у сирому файлі (1-based)
-#    code: 1
-#    unicode: 2
-#    brand: 3
-#    name: 4
-#    stock: 5
-#    price_EUR: 6
-#  filters:
-#    drop_if_missing: [ "code", "price_EUR" ]
-#    stock_mapping:
-#      "STAN": 10
-#      "> 5": 10
-#    stock_min_zero: true       # від’ємні значення → 0
-#  cleaning:
-#    trim_all: true
-#    replace:
-#      - { find: "> 5", replace: "10" }
-#  notes: >
-#    Supplier AP_GDANSK.
-#    Raw format: CODE;UNICODE;BRAND;NAME;STOCK;PRICE_EUR.
-#    All prices are in EUR. Stock fields like "STAN" or "> 5" map to 10.
-
-
 # ============================================================
 # SUPPLIERS CONFIG
 # Кожен постачальник описується блоком з мапінгом колонок.
@@ -78,4 +42,27 @@ AP_GDANSK:
     STAN = stock, CENA = price.
     Перший рядок — заголовок, пропускається.
 
+
+MOTOROL:
+  supplier_id: 3
+  raw_layout:
+    columns:
+      code: 0
+      unicode: 0
+      brand: 1
+      name: 1
+      stock: 2
+      price: 3
+    stock_index: 2
+    stock_header_token: "stan"
+    gt5_to: 10
+  csv_hint:
+    encoding: "utf-8"
+    delimiter: ";"
+  preprocess:
+    skip_rows: 0
+  normalize:
+    replace_gt_sign: true
+  notes: >
+    Лист приходить .zip → всередині .csv з табуляцією; перед обробкою форматуємо у ';'.
 
