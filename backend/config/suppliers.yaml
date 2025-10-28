@@ -48,12 +48,12 @@ MOTOROL:
   raw_layout:
     columns:
       code: 0
-      unicode: 0
-      brand: 1
-      name: 1
-      stock: 2
-      price: 3
-    stock_index: 2
+      unicode: 1
+      brand: 3
+      name: 2
+      stock: 4
+      price: 5
+    stock_index: 4
     stock_header_token: "stan"
     gt5_to: 10
   csv_hint:
@@ -62,7 +62,7 @@ MOTOROL:
   preprocess:
     skip_rows: 0
   normalize:
-    replace_gt_sign: true
-  notes: >
-    Лист приходить .zip → всередині .csv з табуляцією; перед обробкою форматуємо у ';'.
+    mode: "csv"            # <-- ВАЖЛИВО: нічого не різати по пробілах
+    replace_gt_sign: true  # '>5' -> 10
+
 

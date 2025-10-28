@@ -51,6 +51,8 @@ backend/__pycache__/
 .pytest_cache/
 .mypy_cache/
 backend/data/
+backend/credentials.json
+backend/token.json
 
 # ===========================================
 # BUILD / DEPLOY
