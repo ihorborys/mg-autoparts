@@ -43,14 +43,24 @@ frontend/dist-ssr/
 venv/
 backend/venv/
 backend/.venv/
+
 __pycache__/
 backend/__pycache__/
+
 *.py[cod]
 *.pyo
 *.pyd
 .pytest_cache/
 .mypy_cache/
-backend/data/
+
+backend/data/temp/
+backend/data/state/
+/data/temp/09033.cennik.csv
+/data/temp/09033.cennik.zip
+/backend/backend/data/state/gmail_puller_state.json
+/data/temp/MOTOROL_formatted_09033.cennik.csv
+
+# OAuth ключі
 backend/credentials.json
 backend/token.json
 
@@ -61,4 +71,3 @@ build/
 dist/
 .cache/
 coverage/
-
