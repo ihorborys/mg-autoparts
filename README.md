@@ -3,6 +3,7 @@
 BACKEND
 
 Запустити сервер для AP_GDANSK:
+uvicorn backend.app.main:app --reload
 uvicorn app.main:app --reload
 
 Gmail puller для MOTOROL:
