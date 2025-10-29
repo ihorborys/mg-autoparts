@@ -57,8 +57,10 @@ backend/data/temp/
 backend/data/state/
 /data/temp/09033.cennik.csv
 /data/temp/09033.cennik.zip
+/backend/data/state/gmail_puller_state.json
+/backend/data/temp/MOTOROL_formatted_09033.cennik.csv
 /backend/backend/data/state/gmail_puller_state.json
-/data/temp/MOTOROL_formatted_09033.cennik.csv
+/data/temp/state/gmail_puller_state.json
 
 # OAuth ключі
 backend/credentials.json
@@ -71,3 +73,5 @@ build/
 dist/
 .cache/
 coverage/
+/backend/backend/data/state/gmail_puller_state.json
+/data/temp/state/gmail_puller_state.json
