@@ -3,7 +3,7 @@ import re
 import gzip
 import shutil
 import yaml
-from ftplib import FTP
+import ftplib
 from datetime import datetime
 from typing import Tuple, List, Dict, Any, Optional
 
@@ -15,18 +15,38 @@ from .storage import StorageClient
 
 
 # ----------------------- FTP / unzip -----------------------
-
 def download_file_from_ftp(remote_path: str, local_path: Path) -> None:
     host = os.getenv("FTP_HOST")
     user = os.getenv("FTP_USER")
     pwd = os.getenv("FTP_PASS")
     if not all([host, user, pwd]):
         raise RuntimeError("FTP credentials are missing in .env")
-    with FTP(host) as ftp:
+
+    # допоміжний виконавець
+    def _retr(ftp):
+        ftp.set_pasv(True)  # як у FileZilla (PASV)
         ftp.login(user, pwd)
         local_path.parent.mkdir(parents=True, exist_ok=True)
         with open(local_path, "wb") as f:
             ftp.retrbinary(f"RETR " + remote_path, f.write)
+        ftp.quit()
+
+    # 1) спроба через Explicit TLS (FTPS)
+    try:
+        ftps = ftplib.FTP_TLS(host, timeout=20)
+        ftps.auth()  # AUTH TLS
+        ftps.prot_p()  # шифрувати data channel
+        _retr(ftps)
+        return
+    except ftplib.all_errors as e_tls:
+        # 2) якщо TLS не доступний — пробуємо звичайний FTP
+        try:
+            ftp = ftplib.FTP(host, timeout=20)
+            _retr(ftp)
+            return
+        except ftplib.all_errors as e_plain:
+            # показати, що пробували обидва варіанти
+            raise RuntimeError(f"FTP/FTPS failed. FTPS: {e_tls}; FTP: {e_plain}")
 
 
 def unzip_gz_file(gz_file: Path, output_csv: Path) -> None:
