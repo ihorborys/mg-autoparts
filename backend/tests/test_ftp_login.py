@@ -2,7 +2,7 @@
 import os, ftplib
 from dotenv import load_dotenv
 
-load_dotenv(".env")  # шлях до твого .env
+load_dotenv("../.env")  # шлях до твого .env
 
 host = os.getenv("FTP_HOST")
 # user = "u458439667.zatoka"
