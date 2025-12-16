@@ -388,7 +388,16 @@ def process_one_price(
     key = f"{prefix}{supplier_code_str}_{stamp}.{ext}"
 
     keep_last = 7
-    # (Тут можна додати логіку для keep_last, якщо треба)
+    if prefix.startswith("1_23/"):
+        keep_last = int(os.getenv("R2_KEEP_123", "7"))
+    elif prefix.startswith("1_27/"):
+        keep_last = int(os.getenv("R2_KEEP_127", "7"))
+    elif prefix.startswith("1_33/site/"):
+        keep_last = int(os.getenv("R2_KEEP_133_SITE", "7"))
+    elif prefix.startswith("1_33/exist/"):
+        keep_last = int(os.getenv("R2_KEEP_133_EXIST", "7"))
+    elif prefix.startswith("netto/"):
+        keep_last = int(os.getenv("R2_KEEP_NETTO", "7"))
 
     url = storage.upload_file(
         local_path=str(out_path),
