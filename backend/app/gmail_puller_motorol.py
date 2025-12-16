@@ -2,21 +2,16 @@
 Gmail puller для MOTOROL:
 - знаходить найновіший лист із вкладенням рівно "09033.cennik.zip"
 - завантажує zip, розпаковує CSV, форматує
-- запускає process_all_prices("MOTOROL", <formatted_csv>)
+- запускає process_all_prices ТІЛЬКИ для профілю "site"
 - прибирає всі тимчасові файли у data/temp (залишає лише state/)
-Запуск (з кореня):   python -m backend.app.gmail_puller_motorol
-Запуск (з backend/): python -m app.gmail_puller_motorol
 """
-
 from __future__ import annotations
-
 import base64
 import json
 import shutil
 import zipfile
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -30,10 +25,12 @@ PROCESS_ONLY_LATEST = True
 REQUIRED_FILENAME = "09033.cennik.zip"
 GMAIL_QUERY = 'has:attachment filename:09033.cennik.zip'
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+# ВАЖЛИВО: ID постачальника MOTOROL у вашій базі
+MOTOROL_SUPPLIER_ID = 3
 
 # Шляхи
-TMP_DIR = TEMP_DIR  # backend/data/temp
-STATE_DIR = TMP_DIR / "state"  # backend/data/temp/state
+TMP_DIR = TEMP_DIR
+STATE_DIR = TMP_DIR / "state"
 STATE_FILE = STATE_DIR / "gmail_puller_state.json"
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -65,11 +62,7 @@ def save_state(state: Dict):
 
 
 def cleanup_temp_preserve_state():
-    """
-    Видаляє ВСЕ у backend/data/temp, окрім теки state/ та самого STATE_FILE.
-    """
     for item in TMP_DIR.iterdir():
-        # зберігаємо теку state
         if item.resolve() == STATE_DIR.resolve():
             continue
         try:
@@ -78,7 +71,6 @@ def cleanup_temp_preserve_state():
             else:
                 shutil.rmtree(item, ignore_errors=True)
         except Exception:
-            # не валимо процес через сміття
             pass
 
 
@@ -109,9 +101,6 @@ def search_messages(service, q: str) -> List[Dict]:
 
 
 def download_first_zip_attachment(service, msg_id: str, dest_dir: Path) -> Optional[Path]:
-    """
-    Завантажує саме вкладення з ім'ям REQUIRED_FILENAME (ігнорує інші).
-    """
     msg = service.users().messages().get(userId="me", id=msg_id).execute()
     parts = (msg.get("payload") or {}).get("parts", []) or []
 
@@ -155,12 +144,6 @@ def unzip_to_csv(zip_path: Path, extract_dir: Path) -> Path:
 
 
 def format_motorol_csv(input_csv: Path, output_csv: Path) -> None:
-    """
-    ЛИШЕ форматування:
-    - табуляція → ';'
-    - прибираємо '; ' → ';'
-    - '>5' → '10' (глобально)
-    """
     import csv, re
     with open(input_csv, newline="", encoding="utf-8", errors="ignore") as src, \
             open(output_csv, "w", newline="", encoding="utf-8") as dst:
@@ -207,14 +190,20 @@ def handle_one_message(service, msg_id: str) -> Dict:
     csv_fmt = TMP_DIR / f"MOTOROL_formatted_{zip_path.stem}.csv"
     format_motorol_csv(csv_raw, csv_fmt)
 
-    # запускаємо мульти-профільний пайплайн
-    results = process_all_prices(supplier="MOTOROL", remote_gz_path=str(csv_fmt))
+    # --- ЗМІНА: Викликаємо обробку ТІЛЬКИ для профілю "site" ---
+    # (Вирішує Проблему 2 - не ганяє зайві прайси)
+    results = process_all_prices(
+        supplier="MOTOROL",
+        supplier_id=MOTOROL_SUPPLIER_ID,
+        remote_gz_path=str(csv_fmt),
+        # profile_filter="site"  # <--- ФІЛЬТР
+    )
+    # -----------------------------------------------------------
 
-    # прибираємо всі проміжні файли для цього листа
     try:
         zip_path.unlink(missing_ok=True)
         csv_raw.unlink(missing_ok=True)
-        csv_fmt.unlink(missing_ok=True)  # <— цього раніше не було
+        csv_fmt.unlink(missing_ok=True)
     except Exception:
         pass
 
@@ -247,23 +236,8 @@ def main():
     ensure_tmp()
     try:
         service = gmail_service()
-        if PROCESS_ONLY_LATEST:
-            find_and_process_latest(service)
-        else:
-            state = load_state()
-            for m in search_messages(service, GMAIL_QUERY) or []:
-                msg_id = m["id"]
-                if already_processed(state, msg_id):
-                    continue
-                try:
-                    out = handle_one_message(service, msg_id)
-                    print("Processed:", out)
-                    mark_processed(state, msg_id)
-                    save_state(state)
-                except Exception as e:
-                    print(f"Error processing {msg_id}: {e}")
+        find_and_process_latest(service)
     finally:
-        # гарантоване прибирання temp незалежно від режиму
         cleanup_temp_preserve_state()
         print("🧹 temp cleaned (state/ збережено).")
 

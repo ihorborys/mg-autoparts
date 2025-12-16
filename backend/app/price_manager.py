@@ -15,13 +15,6 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
 
 
 def _get_supplier_id(supplier: str) -> Optional[int]:
-    """
-    Читає config/suppliers.yaml і повертає supplier_id для імені постачальника.
-    Очікується структура:
-      AP_GDANSK:
-        supplier_id: 2
-        ...
-    """
     cfg = _load_yaml(CONFIG_DIR / "suppliers.yaml")
     node = cfg.get(supplier) or cfg.get(supplier.upper()) or cfg.get(supplier.lower())
     if not node:
@@ -33,26 +26,38 @@ def process_all_prices(
         supplier: str,
         remote_gz_path: str,
         *,
-        delete_input_after: bool = False,  # зручно для Gmail-потоку
+        delete_input_after: bool = False,
+        supplier_id: Optional[int] = None,
+        # --- НОВИЙ ПАРАМЕТР ДЛЯ ФІЛЬТРАЦІЇ ---
+        profile_filter: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
-    Пройти всі профілі з config/profiles.yaml для заданого постачальника.
+    Пройти профілі з config/profiles.yaml.
+    Якщо задано profile_filter, обробляються тільки ті профілі, назва яких містить цей фільтр.
     """
     profiles_cfg = _load_yaml(CONFIG_DIR / "profiles.yaml")
     profiles = profiles_cfg.get("profiles", [])
     common = profiles_cfg.get("common", {})
     rounding = (common.get("rounding") or {"EUR": 2, "UAH": 0})
 
-    supplier_id = _get_supplier_id(supplier)
+    if supplier_id is None:
+        supplier_id = _get_supplier_id(supplier)
 
     results: List[Dict[str, Any]] = []
     for profile in profiles:
         name = profile["name"]
-        factor = float(profile["factor"])
-        currency_out = str(profile["currency_out"]).upper()  # EUR | UAH
-        format_ = profile["format"]  # xlsx | csv
 
-        # r2_prefix може мати плейсхолдер {supplier}
+        # --- ЛОГІКА ФІЛЬТРАЦІЇ (Вирішує Проблему 2) ---
+        if profile_filter and profile_filter.lower() not in name.lower():
+            # Якщо ім'я профілю не містить фільтр (наприклад "site"), пропускаємо його
+            print(f"ℹ️  Skipping profile '{name}' (filter='{profile_filter}')")
+            continue
+        # ----------------------------------------------
+
+        factor = float(profile["factor"])
+        currency_out = str(profile["currency_out"]).upper()
+        format_ = profile["format"]
+
         r2_prefix = (profile.get("r2_prefix") or "").format(supplier=supplier.lower())
         if r2_prefix and not r2_prefix.endswith("/"):
             r2_prefix += "/"
@@ -60,11 +65,9 @@ def process_all_prices(
         columns = profile.get("columns") or []
         csv_cfg = profile.get("csv") or {}
 
-        # курс лише для UAH-профілів
         rate = 1.0
         if currency_out == "UAH":
             rp = profile.get("rate_params") or {}
-            # Підтримуємо обидва варіанти fallback
             fb = rp.get("fallback")
             fallback_value = fb.get("value") if isinstance(fb, dict) else (fb or 50)
             rate = get_eur_to_uah(
@@ -75,7 +78,6 @@ def process_all_prices(
 
         print(f"➡️  {name}: factor={factor}, out={currency_out}, fmt={format_}, r2={r2_prefix}")
 
-        # Викликаємо пайплайн
         key, url = process_one_price(
             remote_gz_path=remote_gz_path,
             supplier=supplier,
@@ -88,7 +90,7 @@ def process_all_prices(
             columns=columns,
             csv_cfg=csv_cfg,
             rate=rate,
-            delete_input_after=delete_input_after,  # ← прокинули
+            delete_input_after=delete_input_after,
         )
 
         results.append({
