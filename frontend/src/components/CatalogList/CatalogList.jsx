@@ -1,61 +1,49 @@
-import styles from "./CatalogList.module.css";
+// src/components/CatalogList/CatalogList.jsx
 import { useSelector } from "react-redux";
-import {
-  selectCampers,
-  selectError,
-  selectLoading,
-} from "../../redux/productsSlice.js";
-import Button from "../Button/Button.jsx";
-import EquipmentList from "../EquipmentList/EquipmentList.jsx";
-import CamperInfoList from "../CamperInfoList/CamperInfoList.jsx";
-import { useNavigate } from "react-router-dom";
-import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn.jsx";
-import Loader from "../Loader/Loader.jsx";
-import ErrorMessage from "../ErrorMessage/ErrorMessage.jsx";
-import { nanoid } from "nanoid";
+import Loader from "../Loader/Loader";
 
 const CatalogList = () => {
-  const campers = useSelector(selectCampers);
-  const navigate = useNavigate();
+  // Дістаємо дані (товари, статус завантаження, помилки) з Redux store
+  const {items, isLoading, error} = useSelector((state) => state.products);
 
-  const loading = useSelector(selectLoading);
-  const errorMessage = useSelector(selectError);
+  if (isLoading) return <Loader/>;
+  if (error) return <p style={{color: 'red', textAlign: 'center'}}>Помилка: {error}</p>;
 
-  const handleClick = (id) => {
-    navigate(`/catalog/${id}`);
-  };
+  // Якщо запиту ще не було або нічого не знайдено
+  if (items.length === 0) {
+    return <p style={{textAlign: 'center', marginTop: '20px', color: '#666'}}>
+      Введіть запит у пошук (наприклад, 'febest'), щоб побачити товари.
+    </p>;
+  }
 
-  console.log(campers);
   return (
-    <ul className={styles.list}>
-      {campers &&
-        campers.map((camper) => (
-          <li key={nanoid()} className={styles.item}>
-            <ul className={styles.camperInfoContainer}>
-              <li className={styles.camperInfoImage}>
-                <img
-                  className={styles.image}
-                  src={camper.gallery[0].thumb}
-                  width={292}
-                  height={320}
-                  alt="Camper image"
-                />
-              </li>
-              <li className={styles.camperInfoWrapper}>
-                <CamperInfoList camper={camper} />
-                <EquipmentList camper={camper} />
-                <Button handleOnClick={() => handleClick(camper.id)}>
-                  Show more
-                </Button>
-              </li>
-            </ul>
-          </li>
-        ))}
-      <div>
-        {loading && <Loader />}
-        {errorMessage && <ErrorMessage errorMessage={errorMessage} />}
-        <LoadMoreBtn disabled={loading} />
-      </div>
+    <ul style={{listStyle: "none", padding: 0}}>
+      {items.map((product) => (
+        // Використовуємо комбінацію коду і постачальника як унікальний ключ
+        <li
+          key={`${product.code}-${product.supplier_id}`}
+          style={{
+            border: "1px solid #eee",
+            borderRadius: '8px',
+            margin: "10px 0",
+            padding: "15px",
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}
+        >
+          <h3 style={{margin: "0 0 10px 0", color: '#333'}}>
+            {product.brand} - <span style={{color: '#555'}}>{product.code}</span>
+          </h3>
+          <p style={{margin: '5px 0'}}>Назва: <strong>{product.name}</strong></p>
+          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '15px'}}>
+            <span>Залишок: {product.stock}</span>
+            {/* Відображаємо ціну з бекенду */}
+            <span style={{fontSize: '1.2em', fontWeight: 'bold', color: '#28a745'}}>
+               € {product.price_eur?.toFixed(2)}
+             </span>
+          </div>
+        </li>
+      ))}
     </ul>
   );
 };
