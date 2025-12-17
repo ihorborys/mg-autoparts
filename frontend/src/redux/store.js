@@ -1,4 +1,3 @@
-// src/redux/store.js
 import { configureStore } from "@reduxjs/toolkit";
 
 // Імпортуємо наш НОВИЙ редьюсер для продуктів
