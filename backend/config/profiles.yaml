@@ -22,7 +22,7 @@ profiles:
       - { from: brand,    header: "brand" }
       - { from: name,     header: "name" }
       - { from: stock,    header: "stock" }
-      - { from: price,    header: "price_EUR" }
+      - { from: price,    header: "price_eur" }
 
   # ----------------- 2. 1.23 (EUR) -----------------
   - name: x1_23_xlsx
@@ -36,7 +36,7 @@ profiles:
       - { from: brand,    header: "brand" }
       - { from: name,     header: "name" }
       - { from: stock,    header: "stock" }
-      - { from: price,    header: "price_EUR" }
+      - { from: price,    header: "price_eur" }
 
   # ----------------- 3. 1.27 (EUR) -----------------
   - name: x1_27_xlsx
@@ -50,7 +50,7 @@ profiles:
       - { from: brand,    header: "brand" }
       - { from: name,     header: "name" }
       - { from: stock,    header: "stock" }
-      - { from: price,    header: "price_EUR" }
+      - { from: price,    header: "price_eur" }
 
   # ----------------- 4. EXIST 1.33 (UAH) -----------------
   - name: exist_1_33_xlsx
@@ -67,7 +67,7 @@ profiles:
       - { from: brand,  header: "brand" }
       - { from: code,   header: "code" }
       - { from: stock,  header: "stock" }
-      - { from: price,  header: "price_UAH" }
+      - { from: price,  header: "price_uah" }
 
   # ----------------- 5. SITE 1.33 (EUR, CSV) -----------------
   - name: site_1_33_csv
@@ -85,4 +85,4 @@ profiles:
       - { from: brand,       header: "brand" }
       - { from: name,        header: "name" }
       - { from: stock,       header: "stock" }
-      - { from: price,       header: "price_EUR" }
+      - { from: price,       header: "price_eur" }
