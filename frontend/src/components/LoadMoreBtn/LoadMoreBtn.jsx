@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCampers } from "../redux/campersOps.js";
-import { setPage } from "../redux/campersSlice.js";
+import { fetchCampers } from "../../redux/productsOps.js";
+import { setPage } from "../../redux/productsSlice.js";
 import styles from "./LoadMoreBtn.module.css";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";

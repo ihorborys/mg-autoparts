@@ -4,7 +4,7 @@ import {
   selectCampers,
   selectError,
   selectLoading,
-} from "../redux/campersSlice.js";
+} from "../../redux/productsSlice.js";
 import Button from "../Button/Button.jsx";
 import EquipmentList from "../EquipmentList/EquipmentList.jsx";
 import CamperInfoList from "../CamperInfoList/CamperInfoList.jsx";

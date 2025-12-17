@@ -16,6 +16,12 @@ load_dotenv()
 
 app = FastAPI(title="Maxgear API")
 
+# === ДОДАТИ ЦЕЙ БЛОК ===
+origins = [
+    "http://localhost:5173", # Адреса вашого Vite фронтенду (перевірте порт при запуску)
+    "http://127.0.0.1:5173",
+]
+
 # Налаштування CORS (щоб фронтенд міг робити запити)
 app.add_middleware(
     CORSMiddleware,

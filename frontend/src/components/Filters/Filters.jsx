@@ -3,10 +3,10 @@ import Button from "../Button/Button.jsx";
 import VehicleType from "./VehicleType/VehicleType.jsx";
 import LocationFilter from "./Location/Location.jsx";
 import Equipment from "./Equipment/Equipment.jsx";
-import { fetchCampers } from "../redux/campersOps.js";
+import { fetchCampers } from "../../redux/productsOps.js";
 import { useDispatch, useSelector } from "react-redux";
-import { selectFilters } from "../redux/filtersSlice.js";
-import { selectCurrentPage, selectLimit } from "../redux/campersSlice.js";
+import { selectFilters } from "../../redux/filtersSlice.js";
+import { selectCurrentPage, selectLimit } from "../../redux/productsSlice.js";
 
 const Filters = () => {
   const currentPage = useSelector(selectCurrentPage);

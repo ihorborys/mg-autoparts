@@ -3,11 +3,11 @@ import CatalogList from "../../components/CatalogList/CatalogList.jsx";
 import Filters from "../../components/Filters/Filters.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { fetchCampers } from "../../components/redux/campersOps.js";
+import { fetchCampers } from "../../redux/productsOps.js";
 import {
   selectCurrentPage,
   selectLimit,
-} from "../../components/redux/campersSlice.js";
+} from "../../redux/productsSlice.js";
 
 const CatalogPage = () => {
   const currentPage = useSelector(selectCurrentPage);

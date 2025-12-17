@@ -4,13 +4,13 @@ import styles from "./CatalogDetailsPage.module.css";
 import CatalogDetailsPageNav from "../../components/Navigation/CatalogDetailsPageNav/CatalogDetailsPageNav.jsx";
 import Loader from "../../components/Loader/Loader.jsx";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage.jsx";
-import { getSelectedCamper } from "../../components/redux/campersOps.js";
+import { getSelectedCamper } from "../../redux/productsOps.js";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectCamper,
   selectError,
   selectLoading,
-} from "../../components/redux/campersSlice.js";
+} from "../../redux/productsSlice.js";
 import { nanoid } from "nanoid";
 
 export const CatalogDetailsPage = () => {

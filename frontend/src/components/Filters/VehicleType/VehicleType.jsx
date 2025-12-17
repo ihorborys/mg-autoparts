@@ -1,6 +1,6 @@
 import styles from "./VehicleType.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { selectVehicleType, setVehicleType } from "../../redux/filtersSlice.js";
+import { selectVehicleType, setVehicleType } from "../../../redux/filtersSlice.js";
 import { TYPES } from "../../../utils/constants.js";
 
 const VehicleType = () => {

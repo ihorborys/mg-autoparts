@@ -1,6 +1,6 @@
 import styles from "./Equipment.module.css";
 import { EQUIPMENTS_FILTER } from "../../../utils/constants.js";
-import { selectEquipment, toggleEquipment } from "../../redux/filtersSlice.js";
+import { selectEquipment, toggleEquipment } from "../../../redux/filtersSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 
 const Equipment = () => {

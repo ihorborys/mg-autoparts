@@ -1,6 +1,6 @@
 import styles from "./FavoriteBtn.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { selectFavorites, toggleFavorite } from "../redux/favoritesSlice.js";
+import { selectFavorites, toggleFavorite } from "../../redux/favoritesSlice.js";
 
 const FavoriteBtn = ({ camperId }) => {
   const dispatch = useDispatch();
