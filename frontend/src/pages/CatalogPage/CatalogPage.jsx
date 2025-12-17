@@ -1,33 +1,13 @@
-import styles from "./CatalogPage.module.css";
-import CatalogList from "../../components/CatalogList/CatalogList.jsx";
-import Filters from "../../components/Filters/Filters.jsx";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { fetchCampers } from "../../redux/productsOps.js";
-import {
-  selectCurrentPage,
-  selectLimit,
-} from "../../redux/productsSlice.js";
+// src/pages/CatalogPage/CatalogPage.jsx
+import Searchbar from "../../components/Searchbar/Searchbar";
+import CatalogList from "../../components/CatalogList/CatalogList";
 
 const CatalogPage = () => {
-  const currentPage = useSelector(selectCurrentPage);
-  const limit = useSelector(selectLimit);
-
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchCampers({ page: currentPage, limit }));
-  }, [dispatch, currentPage, limit]);
-
   return (
-    <div className={styles.catalogContainer}>
-      <div className={styles.catalogPageWrapper}>
-        <section className={styles.catalogFilters}>
-          <Filters />
-        </section>
-        <section className={styles.catalogList}>
-          <CatalogList />
-        </section>
-      </div>
+    <div style={{maxWidth: '800px', margin: '0 auto', padding: '20px'}}>
+      <h1 style={{textAlign: 'center'}}>Пошук Автозапчастин</h1>
+      <Searchbar/>
+      <CatalogList/>
     </div>
   );
 };

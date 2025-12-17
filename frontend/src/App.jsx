@@ -1,57 +1,41 @@
+// src/App.jsx
 import "./App.css";
-import {Route, Routes} from "react-router-dom";
-import {lazy, Suspense} from "react";
+import { Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import Loader from "./components/Loader/Loader.jsx";
 
-const HomePage = lazy(() =>
-    new Promise(resolve => {
-        setTimeout(() => resolve(import("./pages/HomePage/HomePage.jsx")), 2000);
-    })
-);
-
+// Імпортуємо тільки потрібні сторінки
+// Я прибрав штучну затримку (setTimeout) для HomePage, вона не потрібна в реальному проєкті
+const HomePage = lazy(() => import("./pages/HomePage/HomePage.jsx"));
 const CatalogPage = lazy(() => import("./pages/CatalogPage/CatalogPage.jsx"));
-const CatalogDetailsPage = lazy(
-    () => import("./pages/CatalogDetailsPage/CatalogDetailsPage.jsx"),
-);
-const Features = lazy(() => import("./components/Features/Features.jsx"));
-const Reviews = lazy(() => import("./components/Reviews/Reviews.jsx"));
-const NotFoundPage = lazy(
-    () => import("./pages/NotFoundPage/NotFoundPage.jsx"),
-);
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage.jsx"));
+
+// Імпортуємо тільки потрібні лейаути
 const HomeLayout = lazy(() => import("./layouts/HomeLayout/HomeLayout.jsx"));
-const CatalogLayout = lazy(
-    () => import("./layouts/CatalogLayout/CatalogLayout.jsx"),
-);
-const CatalogDetailsPageLayout = lazy(
-    () =>
-        import("./layouts/CatalogDetailsPageLayout/CatalogDetailsPageLayout.jsx"),
-);
+const CatalogLayout = lazy(() => import("./layouts/CatalogLayout/CatalogLayout.jsx"));
 
 function App() {
-    return (
-        <div>
-            <Suspense fallback={<Loader/>}>
-                <Routes>
-                    <Route path={"/"} element={<HomeLayout/>}>
-                        <Route index element={<HomePage/>}></Route>
-                    </Route>
-                    <Route path={"/catalog"} element={<CatalogLayout/>}>
-                        <Route path={"/catalog"} element={<CatalogPage/>}></Route>
-                    </Route>
-                    <Route
-                        path={"/catalog/:camperId"}
-                        element={<CatalogDetailsPageLayout/>}
-                    >
-                        <Route path={"/catalog/:camperId"} element={<CatalogDetailsPage/>}>
-                            <Route path={"features"} element={<Features/>}/>
-                            <Route path={"reviews"} element={<Reviews/>}/>
-                        </Route>
-                    </Route>
-                    <Route path="*" element={<NotFoundPage/>}/>
-                </Routes>
-            </Suspense>
-        </div>
-    );
+  return (
+    <div>
+      <Suspense fallback={<Loader/>}>
+        <Routes>
+          {/* Головна сторінка */}
+          <Route path={"/"} element={<HomeLayout/>}>
+            <Route index element={<HomePage/>}></Route>
+          </Route>
+
+          {/* Сторінка каталогу запчастин */}
+          <Route path={"/catalog"} element={<CatalogLayout/>}>
+            {/* Зверніть увагу: тут шлях "index", а не дублювання "/catalog" */}
+            <Route index element={<CatalogPage/>}></Route>
+          </Route>
+
+          {/* Сторінка 404 */}
+          <Route path="*" element={<NotFoundPage/>}/>
+        </Routes>
+      </Suspense>
+    </div>
+  );
 }
 
 export default App;
