@@ -31,16 +31,36 @@ const CatalogList = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
           }}
         >
-          <h3 style={{margin: "0 0 10px 0", color: '#333'}}>
-            {product.brand} - <span style={{color: '#555'}}>{product.code}</span>
+          <p style={{margin: '5px 300px', color: 'rgba(0, 0, 0, 1)'}}>
+            ID Постачальника: <strong style={{color: 'rgba(0, 0, 0, 1)'}}>{product.supplier_id}</strong>
+          </p>
+
+          <h3 style={{margin: "0 0 10px 0", color: 'rgba(0, 0, 0, 1)'}}>
+            {product.brand} -
+            {/* color: '#cccccc' - світло-сірий для артикулу, щоб трохи відрізнявся */}
+            <span style={{color: 'rgba(0, 0, 0, 1)', marginLeft: '5px'}}>{product.code}</span>
           </h3>
-          <p style={{margin: '5px 0'}}>Назва: <strong>{product.name}</strong></p>
-          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '15px'}}>
-            <span>Залишок: {product.stock}</span>
-            {/* Відображаємо ціну з бекенду */}
-            <span style={{fontSize: '1.2em', fontWeight: 'bold', color: '#28a745'}}>
-               € {product.price_eur?.toFixed(2)}
-             </span>
+
+          {/* Назва товару */}
+          {/* Додано color: '#e0e0e0' - дуже світлий сірий для лейблу "Назва:" */}
+          <p style={{margin: '5px 0', color: 'rgba(0, 0, 0, 1)'}}>
+            Назва: <strong style={{color: 'rgba(0, 0, 0, 1)'}}>{product.name}</strong>
+          </p>
+
+
+          {/* Блок з залишком і ціною */}
+          <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '15px', alignItems: 'center'}}>
+            {/* Додано color: '#e0e0e0' для тексту залишку */}
+            <span style={{color: 'rgba(0, 0, 0, 1)'}}>
+      Залишок: {product.stock}
+  </span>
+
+
+            {/* Ціна. Колір #28a745 (зелений) зазвичай добре видно і на темному, залишив його. */}
+            <span style={{fontSize: '1.3em', fontWeight: 'bold', color: '#28a745'}}>
+     € {product.price_eur?.toFixed(2)}
+              {product.supplier_id}
+   </span>
           </div>
         </li>
       ))}
