@@ -6,7 +6,7 @@ import {
     selectCamper,
     selectError,
     selectLoading,
-} from "../redux/campersSlice.js";
+} from "../../redux/productsSlice.js";
 // import BookForm from "../BookForm/BookForm.jsx";
 import {nanoid} from "nanoid";
 
