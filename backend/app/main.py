@@ -1,14 +1,22 @@
+import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+import uvicorn
 
+# --- ІМПОРТ РОУТЕРІВ ---
+# Ми імпортуємо наші модулі з папки routers
+from .routers import admin
+# Якщо ви вже створили search.py на попередньому кроці, розкоментуйте цей рядок:
+from .routers import search
+# -----------------------
+
+# Завантаження змінних оточення
 load_dotenv()
 
-from .storage import StorageClient
-from .price_manager import process_all_prices
-
 app = FastAPI(title="Maxgear API")
+
+# Налаштування CORS (щоб фронтенд міг робити запити)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
@@ -17,18 +25,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-storage = StorageClient()
+# --- ПІДКЛЮЧЕННЯ РОУТЕРІВ ---
 
+# 1. Підключаємо адмінські маршрути.
+# Всі маршрути з файлу routers/admin.py будуть починатися з префіксу /admin
+# Наприклад: /admin/import-all
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
 
-class ImportAllRequest(BaseModel):
-    remote_gz_path: str
-    supplier: str  # напр. "AP_GDANSK"
+# 2. Підключаємо пошукові маршрути (якщо файл search.py існує).
+# Всі маршрути будуть починатися з /api
+# Наприклад: /api/search
+# Якщо ви вже створили search.py, розкоментуйте цей рядок:
+app.include_router(search.router, prefix="/api", tags=["search"])
 
+# ----------------------------
 
-@app.post("/admin/import-all")
-def import_all(req: ImportAllRequest):
-    try:
-        results = process_all_prices(req.supplier, req.remote_gz_path)
-        return {"supplier": req.supplier, "results": results}
-    except Exception as e:
-        raise HTTPException(500, f"Import failed: {e}")
+@app.get("/")
+def root():
+    """Проста перевірка, що сервер працює"""
+    return {"message": "Maxgear API is running! Go to /docs to see API"}
+
+if __name__ == "__main__":
+    # Запуск сервера для локальної розробки
+    # reload=True автоматично перезапускає сервер при зміні коду
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -349,11 +349,21 @@ def process_one_price(
             # КРОК А: Очищення старих даних ТІЛЬКИ цього постачальника
             print(f"[INFO] DB: Removing old records for supplier ID {supplier_id}...")
             with engine.connect() as conn:
-                conn.execute(
-                    text("DELETE FROM product_catalog WHERE supplier_id = :sup_id"),
-                    {"sup_id": supplier_id}
-                )
-                conn.commit()
+                # НОВЕ: Перевіряємо, чи існує таблиця, перед видаленням
+                from sqlalchemy import inspect
+                inspector = inspect(engine)
+
+                if inspector.has_table("product_catalog"):
+                    # Таблиця є, можна видаляти старі записи
+                    conn.execute(
+                        text("DELETE FROM product_catalog WHERE supplier_id = :sup_id"),
+                        {"sup_id": supplier_id}
+                    )
+                    conn.commit()
+                    print(f"[INFO] DB: Old records deleted.")
+                else:
+                    # Таблиці немає, нічого видаляти. Вона створиться на наступному кроці.
+                    print(f"[INFO] DB: Table 'product_catalog' does not exist yet. Skipping DELETE.")
 
             # КРОК Б: Додавання нових даних (append)
             print(f"[INFO] DB: Appending {len(out_df)} new rows for supplier ID {supplier_id}...")
