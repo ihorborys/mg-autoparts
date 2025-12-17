@@ -52,15 +52,13 @@ const CatalogList = () => {
           <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '15px', alignItems: 'center'}}>
             {/* Додано color: '#e0e0e0' для тексту залишку */}
             <span style={{color: 'rgba(0, 0, 0, 1)'}}>
-      Залишок: {product.stock}
-  </span>
-
+              Залишок: {product.stock}
+            </span>
 
             {/* Ціна. Колір #28a745 (зелений) зазвичай добре видно і на темному, залишив його. */}
             <span style={{fontSize: '1.3em', fontWeight: 'bold', color: '#28a745'}}>
-     € {product.price_eur?.toFixed(2)}
-              {product.supplier_id}
-   </span>
+              € {Number(product.price_eur).toFixed(2)}
+            </span>
           </div>
         </li>
       ))}
