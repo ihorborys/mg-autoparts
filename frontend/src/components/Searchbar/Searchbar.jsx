@@ -1,36 +1,8 @@
-// src/components/Searchbar/Searchbar.jsx
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchProductsByQuery } from "../../redux/productsOps";
+import styles from "./Searchbar.module.css";
 
-const styles = {
-  container: {
-    display: 'flex',
-    gap: '10px',
-    marginBottom: '20px',
-    padding: '20px',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    backgroundColor: '#f9f9f9'
-  },
-  input: {
-    flexGrow: 1,
-    padding: '12px',
-    fontSize: '16px',
-    border: '1px solid #ccc',
-    borderRadius: '4px'
-  },
-  button: {
-    padding: '12px 24px',
-    fontSize: '16px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold'
-  }
-};
 
 const Searchbar = () => {
   const [query, setQuery] = useState("");
@@ -45,15 +17,15 @@ const Searchbar = () => {
   };
 
   return (
-    <form style={styles.container} onSubmit={handleSubmit}>
+    <form className={styles.container} onSubmit={handleSubmit}>
       <input
         type="text"
-        style={styles.input}
+        className={styles.input}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Введіть артикул або бренд (напр. febest)..."
+        placeholder="Введіть артикул або бренд (наприклад: 602000700 або Luk) ..."
       />
-      <button type="submit" style={styles.button}>
+      <button type="submit" className={styles.button}>
         Пошук
       </button>
     </form>

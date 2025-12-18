@@ -1,14 +1,20 @@
-// src/pages/CatalogPage/CatalogPage.jsx
+import styles from "./CatalogPage.module.css";
 import Searchbar from "../../components/Searchbar/Searchbar";
 import CatalogList from "../../components/CatalogList/CatalogList";
+import Container from "../../layouts/Container/Container.jsx";
 
 const CatalogPage = () => {
   return (
-    <div style={{maxWidth: '800px', margin: '0 auto', padding: '20px'}}>
-      <h1 style={{textAlign: 'center'}}>Пошук Автозапчастин</h1>
-      <Searchbar/>
-      <CatalogList/>
-    </div>
+    <Container>
+      <div className={styles.containerCatalogPage}>
+        <section>FILTERS</section>
+        <section>
+          <h2 className={styles.title}>Каталог Автозапчастин</h2>
+          <Searchbar/>
+          <CatalogList/>
+        </section>
+      </div>
+    </Container>
   );
 };
 
