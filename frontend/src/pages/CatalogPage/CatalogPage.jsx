@@ -1,6 +1,6 @@
 import styles from "./CatalogPage.module.css";
 import Searchbar from "../../components/Searchbar/Searchbar";
-import CatalogList from "../../components/CatalogList/CatalogList";
+import CatalogList from "../../components/CatalogPage/CatalogList/CatalogList";
 import Container from "../../layouts/Container/Container.jsx";
 
 const CatalogPage = () => {

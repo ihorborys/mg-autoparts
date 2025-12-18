@@ -23,7 +23,7 @@ const Searchbar = () => {
         className={styles.input}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Введіть артикул або бренд (наприклад: 602000700 або Luk) ..."
+        placeholder="Введіть артикул або бренд (наприклад: 602000700 або Luk)"
       />
       <button type="submit" className={styles.button}>
         Пошук
