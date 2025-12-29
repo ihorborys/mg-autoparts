@@ -36,6 +36,9 @@
     padding: 5px 20px;
 }
 
+.price {
+}
+
 .outOfStock {
     background-color: var(--red);
 }

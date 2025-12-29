@@ -30,6 +30,12 @@ const CatalogItem = ({product}) => {
           <p className={`${styles.stock} ${stockColorClass}`}>
             {product.stock}
           </p>
+
+        </section>
+        <section className={styles.section} npm>
+          <p className={styles.price}>
+            {product.price_eur}
+          </p>
         </section>
 
 
