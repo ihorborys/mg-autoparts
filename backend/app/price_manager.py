@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 import yaml
 
-from .paths import CONFIG_DIR
+from app.services.paths import CONFIG_DIR
 from .price_processor import process_one_price
-from .exchange import get_eur_to_uah
+from app.services.exchange import get_eur_to_uah
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
