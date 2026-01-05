@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 # Імпортуємо функцію обробки з сусідньої папки (тому дві крапки ..)
-from ..price_manager import process_all_prices
+from app.etl.price_manager import process_all_prices
 
 # Створюємо роутер замість цілого додатку FastAPI
 router = APIRouter()

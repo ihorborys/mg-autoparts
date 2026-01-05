@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,9 +5,9 @@ import uvicorn
 
 # --- ІМПОРТ РОУТЕРІВ ---
 # Ми імпортуємо наші модулі з папки routers
-from .routers import admin
 # Якщо ви вже створили search.py на попередньому кроці, розкоментуйте цей рядок:
-from .routers import search
+from app.api.routers import search, admin
+
 # -----------------------
 
 # Завантаження змінних оточення

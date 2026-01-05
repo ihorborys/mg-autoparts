@@ -2,8 +2,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
-from pathlib import Path
-from app.price_processor import process_one_price
+from app import process_one_price
 
 if __name__ == "__main__":
     csv_path = "data/temp/09033.cennik.csv"  # поклади сюди свій сформатований CSV
