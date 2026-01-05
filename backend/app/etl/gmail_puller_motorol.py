@@ -33,9 +33,9 @@ TMP_DIR = TEMP_DIR
 STATE_DIR = TMP_DIR / "state"
 STATE_FILE = STATE_DIR / "gmail_puller_state.json"
 
-BACKEND_DIR = Path(__file__).resolve().parents[1]
-CREDENTIALS_PATH = BACKEND_DIR / "credentials.json"
-TOKEN_PATH = BACKEND_DIR / "token.json"
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+CREDENTIALS_PATH = BACKEND_DIR / "app" / "config" /"credentials.json"
+TOKEN_PATH = BACKEND_DIR / "app" / "config" /"token.json"
 
 load_dotenv(BACKEND_DIR / ".env")
 

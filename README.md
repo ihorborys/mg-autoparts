@@ -3,16 +3,16 @@
 BACKEND
 
 Запустити сервер для AP_GDANSK:
-uvicorn backend.app.main:app --reload
-uvicorn app.main:app --reload
+uvicorn backend.app.api.main:app --reload
+uvicorn app.api.main:app --reload
 
 Gmail puller для MOTOROL:
 
 - знаходить найновіший лист із вкладенням рівно "09033.cennik.zip"
 - завантажує zip, розпаковує CSV, форматує
 - запускає process_all_prices("MOTOROL", <formatted_csv>)
-  Запуск (з кореня):   python -m backend.app.gmail_puller_motorol
-  Запуск (з backend/): python -m app.gmail_puller_motorol
+  Запуск (з кореня):   python -m backend.app.etl.gmail_puller_motorol
+  Запуск (з backend/): python -m app.etl.gmail_puller_motorol
 
 ## License / Ліцензія
 

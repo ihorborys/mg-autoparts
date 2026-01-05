@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datetime import datetime
-from app.services.storage import StorageClient
+from app import StorageClient
 
 
 def test_cleanup():
