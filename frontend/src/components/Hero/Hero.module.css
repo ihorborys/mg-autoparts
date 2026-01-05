@@ -1,7 +1,7 @@
 .wrapper {
     background-image: image-set(
-            url('/img/hero/hero.webp') 1x,
-            url('/img/hero/hero@2x.webp') 2x
+            url('/img/hero/hero.png') 1x,
+            url('/img/hero/hero.png') 2x
     );
     background-size: cover;
     background-position: center;
