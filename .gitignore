@@ -23,11 +23,15 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # ===========================================
-# ENVIRONMENT FILES
+SECRETS & ENVIRONMENT (ВАЖЛИВО!)
 # ===========================================
 .env
 .env.*
 *.local
+
+# Нові шляхи до ключів Google (згідно з твоєю структурою)
+backend/app/config/credentials.json
+backend/app/config/token.json
 
 # ===========================================
 # FRONTEND
@@ -36,35 +40,33 @@ node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
+frontend/coverage/
 
 # ===========================================
-# BACKEND
+# BACKEND (PYTHON)
 # ===========================================
+# Віртуальне середовище
 venv/
 backend/venv/
 backend/.venv/
 
+# Кеш Python
 __pycache__/
-backend/__pycache__/
-
+backend/**/__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 .pytest_cache/
 .mypy_cache/
 
-backend/data/temp/
-backend/data/state/
-/data/temp/09033.cennik.csv
-/data/temp/09033.cennik.zip
-/backend/data/state/gmail_puller_state.json
-/backend/data/temp/MOTOROL_formatted_09033.cennik.csv
-/backend/backend/data/state/gmail_puller_state.json
-/data/temp/state/gmail_puller_state.json
+# ===========================================
+# DATA & TEMP FILES
+# ===========================================
+# Ігноруємо всю папку data, щоб не комітити CSV, ZIP та state файли
+backend/data/
 
-# OAuth ключі
-backend/app/config/credentials.json
-backend/app/config/token.json
+# Якщо ти раптом створиш data в корені
+data/
 
 # ===========================================
 # BUILD / DEPLOY
@@ -73,5 +75,3 @@ build/
 dist/
 .cache/
 coverage/
-/backend/backend/data/state/gmail_puller_state.json
-/data/temp/state/gmail_puller_state.json

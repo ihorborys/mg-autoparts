@@ -12,8 +12,8 @@ import pandas as pd
 # --- Імпорт text для безпечних SQL-запитів ---
 from sqlalchemy import create_engine, text
 
-from .paths import TEMP_DIR
-from .storage import StorageClient
+from app.services.paths import TEMP_DIR
+from app.services.storage import StorageClient
 
 
 # ----------------------- FTP / unzip -----------------------
