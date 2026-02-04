@@ -63,8 +63,8 @@ backend/data/state/
 /data/temp/state/gmail_puller_state.json
 
 # OAuth ключі
-backend/credentials.json
-backend/token.json
+backend/app/config/credentials.json
+backend/app/config/token.json
 
 # ===========================================
 # BUILD / DEPLOY
