@@ -17,40 +17,7 @@ from app.services.storage import StorageClient
 
 
 # ----------------------- FTP / unzip -----------------------
-# def download_file_from_ftp(remote_path: str, local_path: Path) -> None:
-#     host = os.getenv("FTP_HOST")
-#     user = os.getenv("FTP_USER")
-#     pwd = os.getenv("FTP_PASS")
-#     if not all([host, user, pwd]):
-#         raise RuntimeError("FTP credentials are missing in .env")
-#
-#     # допоміжний виконавець
-#     def _retr(ftp):
-#         ftp.set_pasv(True)  # як у FileZilla (PASV)
-#         ftp.login(user, pwd)
-#         local_path.parent.mkdir(parents=True, exist_ok=True)
-#         with open(local_path, "wb") as f:
-#             ftp.retrbinary(f"RETR " + remote_path, f.write)
-#         ftp.quit()
-#
-#     # 1) спроба через Explicit TLS (FTPS)
-#     try:
-#         ftps = ftplib.FTP_TLS(host, timeout=20)
-#         ftps.auth()  # AUTH TLS
-#         ftps.prot_p()  # шифрувати data channel
-#         _retr(ftps)
-#         return
-#     except ftplib.all_errors as e_tls:
-#         # 2) якщо TLS не доступний — пробуємо звичайний FTP
-#         try:
-#             ftp = ftplib.FTP(host, timeout=20)
-#             _retr(ftp)
-#             return
-#         except ftplib.all_errors as e_plain:
-#             # показати, що пробували обидва варіанти
-#             raise RuntimeError(f"FTP/FTPS failed. FTPS: {e_tls}; FTP: {e_plain}")
 
-# ----------------------- FTP / unzip -----------------------
 def download_file_from_ftp(remote_path: str, local_path: Path, supplier: str) -> None:
     """
     Завантажує файл з FTP, використовуючи динамічні секрети з .env
@@ -142,60 +109,6 @@ def _normalize_line_with_cfg(line: str, gt5_to: Optional[int]) -> str:
     line = re.sub(r"\s", ";", line)
     return line
 
-
-# def raw_csv_to_rows(
-#         input_csv: Path,
-#         *,
-#         stock_index: Optional[int],
-#         stock_header_token: str = "STAN",
-#         gt5_to: Optional[int] = None,
-#         skip_rows: int = 0,
-#         normalize_mode: str = "spaces",  # "spaces" | "csv"
-# ) -> List[List[str]]:
-#     """
-#     Читає сирий CSV і повертає рядки (list[str]).
-#     """
-#     rows: List[List[str]] = []
-#     with open(input_csv, "r", encoding="utf-8", errors="ignore") as f:
-#         for i, raw in enumerate(f):
-#             if i < skip_rows:
-#                 continue
-#             raw = raw.strip()
-#             if not raw:
-#                 continue
-#
-#             if normalize_mode == "csv":
-#                 parts = raw.split(";")
-#             else:
-#                 norm = _normalize_line_with_cfg(raw, gt5_to=gt5_to)
-#                 parts = norm.split(";")
-#
-#             if not parts:
-#                 continue
-#
-#             idx = stock_index if stock_index is not None else (len(parts) - 1)
-#             if idx < 0 or idx >= len(parts):
-#                 continue
-#
-#             val = (parts[idx] or "").strip()
-#
-#             # пропускаємо службовий заголовок стоку
-#             if val.lower() == (stock_header_token or "").lower():
-#                 continue
-#
-#             # нормалізуємо '>5' у числове значення
-#             if gt5_to is not None and (val.startswith(">") or val.replace(" ", "").startswith(">")):
-#                 val = str(gt5_to)
-#                 parts[idx] = val
-#
-#             try:
-#                 if float(val) <= 0:
-#                     continue
-#             except ValueError:
-#                 continue
-#
-#             rows.append(parts)
-#     return rows
 
 def raw_csv_to_rows(
         input_csv: Path,
@@ -355,33 +268,6 @@ def _build_output_df(
 
 # ----------------------- Materialize to CSV -----------------------
 
-# def _materialize_to_csv(remote_path: str, tmp_dir: Path) -> tuple[Path, list[Path]]:
-#     """
-#     Приводить будь-яке джерело до локального CSV.
-#     """
-#     cleanup: list[Path] = []
-#
-#     if os.path.exists(remote_path):
-#         p = Path(remote_path)
-#         if p.suffix.lower() == ".csv":
-#             return p, cleanup
-#         if p.suffix.lower() == ".gz":
-#             csv_out = tmp_dir / f"{p.stem}"
-#             if csv_out.suffix.lower() != ".csv":
-#                 csv_out = csv_out.with_suffix(".csv")
-#             unzip_gz_file(p, csv_out)
-#             cleanup.append(csv_out)
-#             return csv_out, cleanup
-#         raise ValueError(f"Unsupported local file type: {p.suffix}")
-#     else:
-#         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#         gz_tmp = tmp_dir / f"ftp_{stamp}.csv.gz"
-#         csv_tmp = tmp_dir / f"ftp_{stamp}.csv"
-#         download_file_from_ftp(remote_path, gz_tmp)
-#         unzip_gz_file(gz_tmp, csv_tmp)
-#         cleanup.extend([gz_tmp, csv_tmp])
-#         return csv_tmp, cleanup
-
 def _materialize_to_csv(remote_path: str, tmp_dir: Path, supplier: str) -> tuple[Path, list[Path]]:
     """
     Завантажує файл (з локального диска або FTP) та готує його до читання.
@@ -433,10 +319,99 @@ def _materialize_to_csv(remote_path: str, tmp_dir: Path, supplier: str) -> tuple
             return download_path, cleanup
 
 
-# ----------------------- Main pipeline -----------------------
+# ----------------------- NEW: ПІДГОТОВКА ДАНИХ (ОДИН РАЗ) -----------------------
 
+def prepare_base_df(
+    supplier: str,
+    additional_files: Optional[Dict[str, str]] = None,
+    remote_gz_path: Optional[str] = None
+) -> Tuple[pd.DataFrame, List[Path]]:
+    """
+    УНІВЕРСАЛЬНА ПІДГОТОВКА:
+    - Завантажує файли (один або кілька).
+    - Сумує залишки по складах (Aggregation).
+    - Робить мердж, якщо це Autopartner (ціни + залишки).
+    - Повертає готовий DataFrame та список файлів для видалення.
+    """
+    tmp_dir = TEMP_DIR
+    local_files = {}
+    cleanup_paths = []
+
+    # 1. Завантаження (Download)
+    if additional_files:
+        print(f"[INFO] 📥 Завантаження кількох файлів для {supplier}...")
+        for key, r_path in additional_files.items():
+            l_path, c_paths = _materialize_to_csv(r_path, tmp_dir, supplier)
+            local_files[key] = l_path
+            cleanup_paths.extend(c_paths)
+    elif remote_gz_path:
+        print(f"[INFO] 📥 Завантаження одного файлу для {supplier}...")
+        l_path, c_paths = _materialize_to_csv(remote_gz_path, tmp_dir, supplier)
+        local_files["prices"] = l_path
+        cleanup_paths.extend(c_paths)
+
+    # 2. Налаштування (Config)
+    sup_cfg = _load_supplier_cfg(supplier)
+    layout = sup_cfg.get("raw_layout", {}) or {}
+    colmap = layout.get("columns") or {}
+    read_params = {
+        "stock_index": layout.get("stock_index"),
+        "stock_header_token": layout.get("stock_header_token", "STAN"),
+        "gt5_to": layout.get("gt5_to"),
+        "skip_rows": (sup_cfg.get("preprocess") or {}).get("skip_rows", 0),
+        "normalize_mode": (sup_cfg.get("normalize") or {}).get("mode", "spaces"),
+    }
+
+    # 3. Обробка даних
+    # СЦЕНАРІЙ А: Autopartner (2 окремі файли)
+    if "prices" in local_files and "stock" in local_files:
+        print(f"[INFO] 🧩 Режим МЕРДЖУ для {supplier}...")
+        rows_p = raw_csv_to_rows(local_files["prices"], **{**read_params, "stock_index": None})
+        df_p = _rows_to_standard_df(rows_p, colmap)
+        df_p["code"] = df_p["code"].astype(str).str.strip().str.upper()
+
+        rows_s = raw_csv_to_rows(local_files["stock"], **read_params)
+        df_s = _rows_to_standard_df(rows_s, colmap)
+        df_s["code"] = df_s["code"].astype(str).str.strip().str.upper()
+
+        # --- СУМУЄМО СКЛАДИ ---
+        print(f"[INFO] 🔄 Агрегація стоку: було {len(df_s)} рядків...")
+        df_s = df_s.groupby("code", as_index=False).agg({"stock": "sum"})
+        print(f"[INFO] ✅ Після об'єднання складів: {len(df_s)} унікальних кодів.")
+
+        # Мердж цін із сумарними залишками
+        df_std = pd.merge(df_p.drop(columns=["stock"]), df_s[["code", "stock"]], on="code", how="inner")
+
+    # СЦЕНАРІЙ Б: Гданськ / Maxgear (1 файл)
+    else:
+        print(f"[INFO] 📄 Режим одного файлу для {supplier}...")
+        main_file = local_files.get("prices") or list(local_files.values())[0]
+        rows = raw_csv_to_rows(main_file, **read_params)
+        df_std = _rows_to_standard_df(rows, colmap)
+        df_std["code"] = df_std["code"].astype(str).str.strip().str.upper()
+
+        # Навіть в одному файлі можуть бути дублі (різні склади)
+        cols_to_keep = [c for c in df_std.columns if c != 'stock']
+        df_std = df_std.groupby(cols_to_keep, as_index=False).agg({"stock": "sum"})
+
+    # 4. Бренди (якщо є файл brands.csv)
+    if "brands" in local_files:
+        print(f"[INFO] 🏷️ Додаємо повні назви брендів...")
+        df_brands = pd.read_csv(local_files["brands"], sep=";", names=["short_name", "full_name"],
+                               encoding="cp1250", quotechar='"', encoding_errors="replace")
+        df_brands["short_name"] = df_brands["short_name"].astype(str).str.strip().str.upper()
+        df_std["brand"] = df_std["brand"].astype(str).str.strip().str.upper()
+
+        df_std = pd.merge(df_std, df_brands, left_on="brand", right_on="short_name", how="left")
+        df_std["brand"] = df_std["full_name"].fillna(df_std["brand"])
+        df_std = df_std.drop(columns=["short_name", "full_name"])
+
+    return df_std, cleanup_paths
+
+
+# ----------------------- Main pipeline -----------------------
 def process_one_price(
-        remote_gz_path: Optional[str],
+        df_input: pd.DataFrame,  # ТЕПЕР ПРИЙМАЄ ГОТОВИЙ DATAFRAME
         supplier: str,
         supplier_id: Optional[int],
         factor: float,
@@ -447,208 +422,55 @@ def process_one_price(
         columns: List[Dict[str, str]],
         csv_cfg: Optional[Dict[str, Any]] = None,
         rate: float = 1.0,
-        delete_input_after: bool = False,
-        additional_files: Optional[Dict[str, str]] = None,
 ) -> Tuple[str, str]:
     """
-    Повний цикл обробки одного прайсу.
+    ЛЕГКИЙ ЕТАП: Тільки націнка, запис у БД та вивантаження файлу.
+    Більше не качає FTP і не робить мердж!
     """
     tmp_dir = TEMP_DIR
-    tmp_dir.mkdir(parents=True, exist_ok=True)
-
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     supplier_code_str = supplier.lower()
 
-    # --- 0) MATERIALIZE (Завантаження файлів) ---
-    cleanup_paths = []
-    local_files = {}
+    # 1) Створюємо копію даних для цього конкретного проходу
+    # Щоб націнка для одного прайсу не вплинула на інший
+    df_std = df_input.copy()
 
-    # # Перевіряємо: якщо прийшов словник з файлами, обробляємо його
-    # if additional_files:
-    #     print(f"[INFO] Materializing multiple files: {list(additional_files.keys())}")
-    #     local_files = {}
-    #     for key, r_path in additional_files.items():
-    #         # Завантажуємо та розпаковуємо кожен файл окремо
-    #         l_path, c_paths = _materialize_to_csv(r_path, tmp_dir)
-    #         local_files[key] = l_path
-    #         cleanup_paths.extend(c_paths)
-    #
-    #     # Для подальшої обробки (normalize) вибираємо головний файл.
-    #     # Зазвичай це файл з ключем "prices". Якщо його немає — беремо перший ліпший.
-    #     csv_path = local_files.get("prices") or list(local_files.values())[0]
-    #
-    # elif remote_gz_path:
-    #     # Стара логіка для одного файлу
-    #     csv_path, c_paths = _materialize_to_csv(remote_gz_path, tmp_dir)
-    #     cleanup_paths.extend(c_paths)
-    # else:
-    #     raise ValueError("No input files provided (remote_gz_path and additional_files are both empty)")
-
-    if additional_files:
-        print(f"[INFO] 📥 Завантаження кількох файлів для {supplier}...")
-        for key, r_path in additional_files.items():
-            l_path, c_paths = _materialize_to_csv(r_path, tmp_dir, supplier)
-            local_files[key] = l_path
-            cleanup_paths.extend(c_paths)
-    elif remote_gz_path:
-        csv_path, c_paths = _materialize_to_csv(remote_gz_path, tmp_dir, supplier)
-        local_files["prices"] = csv_path
-        cleanup_paths.extend(c_paths)
-    else:
-        raise ValueError("No input files provided")
-
-    # --- 1) ПІДГОТОВКА ---
-    sup_cfg = _load_supplier_cfg(supplier)
-    layout = sup_cfg.get("raw_layout", {}) or {}
-    colmap: Dict[str, int] = (layout.get("columns") or {})
-
-
-    # Збираємо параметри читання, щоб не дублювати їх для кожного файлу
-    read_params = {
-        "stock_index": layout.get("stock_index"),
-        "stock_header_token": layout.get("stock_header_token", "STAN"),
-        "gt5_to": layout.get("gt5_to"),
-        "skip_rows": (sup_cfg.get("preprocess") or {}).get("skip_rows", 0),
-        "normalize_mode": (sup_cfg.get("normalize") or {}).get("mode", "spaces"),
-    }
-
-    # 2) ВИКОНАННЯ МЕРДЖУ ДЛЯ ТЕСТУВАННЯ
-    if "prices" in local_files and "stock" in local_files:
-        print(f"[INFO] 🧩 Режим МЕРДЖУ: Об'єднуємо ціни та залишки...")
-
-        # # 👇 ВСТАВЛЯЙ СЮДИ ЦЕЙ БЛОК:
-        # try:
-        #     with open(local_files["prices"], 'r', encoding='utf-8', errors='ignore') as f:
-        #         head = [f.readline().strip() for _ in range(5)]
-        #     print(f"DEBUG: ПЕРШІ 5 РЯДКІВ ПРАЙСУ: {head}")
-        # except Exception as e:
-        #     print(f"DEBUG ERROR: {e}")
-        # # 👆 КІНЕЦЬ БЛОКУ
-
-        # 1. Читаємо файл цін
-        rows_p = raw_csv_to_rows(local_files["prices"], **{**read_params, "stock_index": None})
-        df_p = _rows_to_standard_df(rows_p, colmap)
-
-        # 2. Читаємо файл залишків
-        rows_s = raw_csv_to_rows(local_files["stock"], **read_params)
-        df_s = _rows_to_standard_df(rows_s, colmap)
-
-        # --- 👇 НОВИЙ БЛОК: АГРЕГАЦІЯ СТОКУ 👇 ---
-        # Групуємо по артикулу і сумуємо залишки
-        print(f"[INFO] 🔄 Підсумовуємо залишки для {len(df_s)} рядків...")
-        df_s = df_s.groupby("code", as_index=False).agg({"stock": "sum"})
-        print(f"[INFO] ✅ Після об'єднання складів залишилося {len(df_s)} унікальних артикулів.")
-        # ------------------------------------------
-
-
-        print(f"DEBUG: К-сть рядків у цінах: {len(df_p)}")
-        print(f"DEBUG: К-сть рядків у залишках: {len(df_s)}")
-
-
-        # 3. ВЛАСНЕ МЕРДЖ (Inner Join)
-        # Ми беремо df_p (ціни), видаляємо там технічну колонку stock (вона пуста)
-        # І приєднуємо реальний stock з df_s по колонці 'code'
-        df_std = pd.merge(
-            df_p.drop(columns=["stock"]),  # Викидаємо пустий сток з файлу цін
-            df_s[["code", "stock"]],   # Беремо тільки код і реальний сток з файлу залишків
-            on="code",
-            how="inner"
-        )
-        print(f"[INFO] ✅ Об'єднання завершено: {len(df_std)} позицій")
-
-        # Додатковий мердж для БРЕНДІВ (якщо є файл)
-        if "brands" in local_files:
-            print(f"[INFO] 🏷️  Додаємо повні назви брендів...")
-            df_brands = pd.read_csv(local_files["brands"], sep=";", names=["short_name", "full_name"], encoding="cp1250", quotechar='"', encoding_errors="replace")
-            df_brands["short_name"] = df_brands["short_name"].astype(str).str.strip().str.upper()
-            df_std["brand"] = df_std["brand"].astype(str).str.strip().str.upper()
-
-            df_std = pd.merge(df_std, df_brands, left_on="brand", right_on="short_name", how="left")
-            df_std["brand"] = df_std["full_name"].fillna(df_std["brand"])
-            df_std = df_std.drop(columns=["short_name", "full_name"])
-
-        print(f"[INFO] ✅ Злиття завершено. Разом позицій: {len(df_std)}")
-
-    else:
-        # Стара логіка для одного файлу (наприклад, Maxgear)
-        csv_path = local_files.get("prices") or list(local_files.values())[0]
-        rows = raw_csv_to_rows(csv_path, **read_params)
-        df_std = _rows_to_standard_df(rows, colmap)
-
-
-
-    if colmap.get("unicode") == colmap.get("code"):
-        df_std["unicode"] = df_std["code"]
-    if colmap.get("name") == colmap.get("brand"):
-        df_std["name"] = df_std["brand"]
-
-    # 2) calc
+    # 2) КАЛЬКУЛЯЦІЯ ЦІНИ
     price_final = _apply_pricing(
         df_std, factor=factor, currency_out=currency_out, rate=rate, rounding=rounding
     )
 
-    # 3) build output
+    # 3) ЗБІРКА ВИХІДНОГО DATAFRAME
     out_df = _build_output_df(
         df_std, price_final, columns_cfg=columns, supplier_id=supplier_id
     )
 
-    # =================================================================
-    # ЗМІНА (Вирішує Проблему 1): Розумне збереження в базу даних
-    # =================================================================
+    # 4) ЗАПИС У POSTGRESQL (тільки для сайтів)
     if "/site/" in r2_prefix and supplier_id is not None:
         try:
-            print(f"[INFO] DB Trigger: Updating site prices for supplier ID {supplier_id}. Connecting to PostgreSQL...")
-            # ВАЖЛИВО: Впишіть ваш пароль!
-            db_password = "123456789"
-
-            db_user = "postgres"
-            db_host = "localhost"
-            db_port = "5432"
-            db_name = "postgres"
-
-            db_url = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+            print(f"[INFO] DB Trigger: Updating site prices for ID {supplier_id}...")
+            db_url = "postgresql+psycopg2://postgres:123456789@localhost:5432/postgres"
             engine = create_engine(db_url)
 
-            # КРОК А: Очищення старих даних ТІЛЬКИ цього постачальника
-            print(f"[INFO] DB: Removing old records for supplier ID {supplier_id}...")
+            # КРОК А: Очищення старих даних саме цього постачальника
             with engine.connect() as conn:
-                # НОВЕ: Перевіряємо, чи існує таблиця, перед видаленням
-                from sqlalchemy import inspect
-                inspector = inspect(engine)
+                conn.execute(
+                    text("DELETE FROM product_catalog WHERE supplier_id = :sid"),
+                    {"sid": supplier_id}
+                )
+                conn.commit()
+                print(f"[INFO] DB: Old records for ID {supplier_id} deleted.")
 
-                if inspector.has_table("product_catalog"):
-                    # Таблиця є, можна видаляти старі записи
-                    conn.execute(
-                        text("DELETE FROM product_catalog WHERE supplier_id = :sup_id"),
-                        {"sup_id": supplier_id}
-                    )
-                    conn.commit()
-                    print(f"[INFO] DB: Old records deleted.")
-                else:
-                    # Таблиці немає, нічого видаляти. Вона створиться на наступному кроці.
-                    print(f"[INFO] DB: Table 'product_catalog' does not exist yet. Skipping DELETE.")
+            # КРОК Б: Запис нових даних
+            # Видаляємо символ NUL та пишемо частинами для швидкості
+            out_df = out_df.replace('\x00', '', regex=True)
+            out_df.to_sql('product_catalog', con=engine, if_exists='append', index=False, chunksize=10000)
 
-            # КРОК Б: Додавання нових даних (append)
-            print(f"[INFO] DB: Appending {len(out_df)} new rows for supplier ID {supplier_id}...")
-
-            # --- 👇 ВСТАВЛЯЙ ЦЕЙ РЯДОК ТУТ 👇 ---
-            # Видаляємо символ NUL (0x00), який PostgreSQL не приймає
-            out_df = out_df.map(lambda x: x.replace('\x00', '') if isinstance(x, str) else x)
-            # ------------------------------------
-
-            # if_exists='append' додає дані до існуючої таблиці
-            out_df.to_sql('product_catalog', con=engine, if_exists='append', index=False)
-
-            print(f"[INFO] PostgreSQL: SUCCESS! Site prices for supplier ID {supplier_id} updated.")
-
+            print(f"[INFO] PostgreSQL: SUCCESS! Site prices updated.")
         except Exception as e:
-            print(f"\n[ERROR] PostgreSQL save failed!!!! Details: {e}\n")
-    elif "/site/" in r2_prefix and supplier_id is None:
-         print(f"\n[WARNING] DB Trigger skipped: Found '/site/' prefix but supplier_id is None.\n")
-    # =================================================================
+            print(f"[ERROR] Database save failed: {e}")
 
-
-    # 4) export
+    # 5) ЕКСПОРТ У ФАЙЛ (Excel або CSV)
     ext = "xlsx" if format_.lower() == "xlsx" else "csv"
     out_path = tmp_dir / f"{supplier_code_str}_{stamp}.{ext}"
 
@@ -657,45 +479,22 @@ def process_one_price(
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     else:
         delim = (csv_cfg or {}).get("delimiter", ";")
-        header = bool((csv_cfg or {}).get("header", True))
-        out_df.to_csv(out_path, index=False, sep=delim, header=header, encoding="utf-8")
+        out_df.to_csv(out_path, index=False, sep=delim, header=True, encoding="utf-8")
         content_type = "text/csv"
 
-    # 5) upload + cloud cleanup policy
+    # 6) ВИВАНТАЖЕННЯ В CLOUDFLARE R2
     storage = StorageClient()
-    prefix = r2_prefix
-    key = f"{prefix}{supplier_code_str}_{stamp}.{ext}"
-
-    keep_last = 7
-    if prefix.startswith("1_23/"):
-        keep_last = int(os.getenv("R2_KEEP_123", "7"))
-    elif prefix.startswith("1_27/"):
-        keep_last = int(os.getenv("R2_KEEP_127", "7"))
-    elif prefix.startswith("1_33/site/"):
-        keep_last = int(os.getenv("R2_KEEP_133_SITE", "7"))
-    elif prefix.startswith("1_33/exist/"):
-        keep_last = int(os.getenv("R2_KEEP_133_EXIST", "7"))
-    elif prefix.startswith("netto/"):
-        keep_last = int(os.getenv("R2_KEEP_NETTO", "7"))
+    key = f"{r2_prefix}{supplier_code_str}_{stamp}.{ext}"
 
     url = storage.upload_file(
         local_path=str(out_path),
         key=key,
         content_type=content_type,
-        cleanup_prefix=prefix,
-        keep_last=keep_last,
+        cleanup_prefix=r2_prefix,
+        keep_last=5,  # Тримаємо 5 останніх версій
     )
 
-    # 6) local cleanup
-    try:
-        out_path.unlink(missing_ok=True)
-        for p in cleanup_paths:
-            p.unlink(missing_ok=True)
-        if delete_input_after and os.path.exists(remote_gz_path):
-            rp = Path(remote_gz_path)
-            if rp.exists() and rp.resolve() not in [out_path.resolve(), *[c.resolve() for c in cleanup_paths]]:
-                rp.unlink(missing_ok=True)
-    except Exception:
-        pass
+    # Видаляємо готовий Excel/CSV з диска після вивантаження
+    out_path.unlink(missing_ok=True)
 
     return key, url
