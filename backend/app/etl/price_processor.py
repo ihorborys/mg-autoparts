@@ -502,11 +502,6 @@ def process_one_price(
     layout = sup_cfg.get("raw_layout", {}) or {}
     colmap: Dict[str, int] = (layout.get("columns") or {})
 
-    # stock_index = layout.get("stock_index")
-    # stock_header_token = layout.get("stock_header_token", "STAN")
-    # gt5_to = layout.get("gt5_to")
-    # skip_rows = (sup_cfg.get("preprocess") or {}).get("skip_rows", 0)
-    # normalize_mode = (sup_cfg.get("normalize") or {}).get("mode", "spaces")
 
     # Збираємо параметри читання, щоб не дублювати їх для кожного файлу
     read_params = {
@@ -517,29 +512,18 @@ def process_one_price(
         "normalize_mode": (sup_cfg.get("normalize") or {}).get("mode", "spaces"),
     }
 
-    # rows = raw_csv_to_rows(
-    #     csv_path,
-    #     stock_index=stock_index,
-    #     stock_header_token=stock_header_token,
-    #     gt5_to=gt5_to,
-    #     skip_rows=skip_rows,
-    #     normalize_mode=normalize_mode,
-    # )
-    #
-    # df_std = _rows_to_standard_df(rows, colmap)
-
-    # 2) ВИКОНАННЯ МЕРДЖУ
+    # 2) ВИКОНАННЯ МЕРДЖУ ДЛЯ ТЕСТУВАННЯ
     if "prices" in local_files and "stock" in local_files:
         print(f"[INFO] 🧩 Режим МЕРДЖУ: Об'єднуємо ціни та залишки...")
 
-        # 👇 ВСТАВЛЯЙ СЮДИ ЦЕЙ БЛОК:
-        try:
-            with open(local_files["prices"], 'r', encoding='utf-8', errors='ignore') as f:
-                head = [f.readline().strip() for _ in range(5)]
-            print(f"DEBUG: ПЕРШІ 5 РЯДКІВ ПРАЙСУ: {head}")
-        except Exception as e:
-            print(f"DEBUG ERROR: {e}")
-        # 👆 КІНЕЦЬ БЛОКУ
+        # # 👇 ВСТАВЛЯЙ СЮДИ ЦЕЙ БЛОК:
+        # try:
+        #     with open(local_files["prices"], 'r', encoding='utf-8', errors='ignore') as f:
+        #         head = [f.readline().strip() for _ in range(5)]
+        #     print(f"DEBUG: ПЕРШІ 5 РЯДКІВ ПРАЙСУ: {head}")
+        # except Exception as e:
+        #     print(f"DEBUG ERROR: {e}")
+        # # 👆 КІНЕЦЬ БЛОКУ
 
         # 1. Читаємо файл цін
         rows_p = raw_csv_to_rows(local_files["prices"], **{**read_params, "stock_index": None})
@@ -549,9 +533,13 @@ def process_one_price(
         rows_s = raw_csv_to_rows(local_files["stock"], **read_params)
         df_s = _rows_to_standard_df(rows_s, colmap)
 
-        # # --- ДОДАЙ ЦЕ ПЕРЕД pd.merge ---
-        # df_p["code"] = df_p["code"].astype(str).str.strip().str.upper()
-        # df_s["code"] = df_s["code"].astype(str).str.strip().str.upper()
+        # --- 👇 НОВИЙ БЛОК: АГРЕГАЦІЯ СТОКУ 👇 ---
+        # Групуємо по артикулу і сумуємо залишки
+        print(f"[INFO] 🔄 Підсумовуємо залишки для {len(df_s)} рядків...")
+        df_s = df_s.groupby("code", as_index=False).agg({"stock": "sum"})
+        print(f"[INFO] ✅ Після об'єднання складів залишилося {len(df_s)} унікальних артикулів.")
+        # ------------------------------------------
+
 
         print(f"DEBUG: К-сть рядків у цінах: {len(df_p)}")
         print(f"DEBUG: К-сть рядків у залишках: {len(df_s)}")
