@@ -472,7 +472,31 @@ def process_one_price(
 
     # 5) ЕКСПОРТ У ФАЙЛ (Excel або CSV)
     ext = "xlsx" if format_.lower() == "xlsx" else "csv"
-    out_path = tmp_dir / f"{supplier_code_str}_{stamp}.{ext}"
+
+    # --- 👇 ЛОГІКА ТЕГІВ ЗГІДНО З ТВОЇМ ЗАПИТОМ 👇 ---
+    date_str = datetime.now().strftime("%d.%m.%y")  # 08.02.26
+    time_str = datetime.now().strftime("%H%M%S")  # 223005
+
+    # Визначаємо мітку на основі префікса шляху (r2_prefix)
+    prefix_lower = r2_prefix.lower()
+
+    if "exist" in prefix_lower:
+        tag = "exist"
+    elif "1_23" in prefix_lower:
+        tag = "m"
+    elif "1_27" in prefix_lower:
+        tag = "l"
+    elif "site" in prefix_lower or "1_33" in prefix_lower:
+        tag = "xl"
+    else:
+        tag = "data"  # Технічний тег, якщо нічого не підійшло
+
+    # Формуємо фінальну назву (тільки малі букви)
+    # Приклад: price_autopartner_08.02.26_223005_xl.xlsx
+    out_name = f"price_{supplier.lower()}_{date_str}_{time_str}_{tag}.{ext}"
+    out_path = tmp_dir / out_name
+    # -----------------------------------------------
+
 
     if ext == "xlsx":
         out_df.to_excel(out_path, index=False, engine="xlsxwriter")
@@ -484,7 +508,7 @@ def process_one_price(
 
     # 6) ВИВАНТАЖЕННЯ В CLOUDFLARE R2
     storage = StorageClient()
-    key = f"{r2_prefix}{supplier_code_str}_{stamp}.{ext}"
+    key = f"{r2_prefix}{out_name}"
 
     url = storage.upload_file(
         local_path=str(out_path),
