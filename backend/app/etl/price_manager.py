@@ -24,12 +24,12 @@ def _get_supplier_id(supplier: str) -> Optional[int]:
 
 def process_all_prices(
         supplier: str,
-        remote_gz_path: str,
+        remote_gz_path: Optional[str], # Зробили Optional, бо тепер можуть бути files
         *,
         delete_input_after: bool = False,
         supplier_id: Optional[int] = None,
-        # --- НОВИЙ ПАРАМЕТР ДЛЯ ФІЛЬТРАЦІЇ ---
         profile_filter: Optional[str] = None,
+        additional_files: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Пройти профілі з config/profiles.yaml.
@@ -91,6 +91,7 @@ def process_all_prices(
             csv_cfg=csv_cfg,
             rate=rate,
             delete_input_after=delete_input_after,
+            additional_files=additional_files
         )
 
         results.append({
